@@ -1,24 +1,23 @@
 dnl $Id$
 dnl config.m4 for extension pdo_cassandra
 
-dnl Comments in this file start with the string 'dnl'.
-dnl Remove where necessary. This file will not work
-dnl without editing.
-
-dnl If your extension references something external, use with:
-
-dnl PHP_ARG_WITH(pdo_cassandra, for pdo_cassandra support,
-dnl Make sure that the comment is aligned:
-dnl [  --with-pdo_cassandra             Include pdo_cassandra support])
-
-dnl Otherwise use enable:
-
-dnl PHP_ARG_ENABLE(pdo_cassandra, whether to enable pdo_cassandra support,
-dnl Make sure that the comment is aligned:
-dnl [  --enable-pdo_cassandra           Enable pdo_cassandra support])
+PHP_ARG_WITH(pdo-cassandra, for pdo_cassandra support,
+[  --with-pdo-cassandra             Include pdo_cassandra support])
 
 if test "$PHP_PDO_CASSANDRA" != "no"; then
-  dnl Write more examples of tests here...
+
+  if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
+    AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
+  fi
+
+	AC_CACHE_CHECK([for PDO Includes], pdo_cv_path, [
+		if test -f $phpincludedir/ext/pdo/php_pdo_driver.h; then
+			pdo_cv_path=$phpincludedir/ext
+		else
+			AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
+		fi
+	])
+	pdo_inc_path=$pdo_cv_path
 
   dnl # --with-pdo_cassandra -> check with-path
   dnl SEARCH_PATH="/usr/local /usr"     # you might want to change this
@@ -59,5 +58,5 @@ if test "$PHP_PDO_CASSANDRA" != "no"; then
   dnl
   dnl PHP_SUBST(PDO_CASSANDRA_SHARED_LIBADD)
 
-  PHP_NEW_EXTENSION(pdo_cassandra, pdo_cassandra.c, $ext_shared)
+  PHP_NEW_EXTENSION(pdo_cassandra, pdo_cassandra.c, $ext_shared,, -I$pdo_inc_path)
 fi
