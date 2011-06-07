@@ -1,0 +1,13 @@
+// $Id$
+// vim:ft=javascript
+
+// If your extension references something external, use ARG_WITH
+// ARG_WITH("pdo_cassandra", "for pdo_cassandra support", "no");
+
+// Otherwise, use ARG_ENABLE
+// ARG_ENABLE("pdo_cassandra", "enable pdo_cassandra support", "no");
+
+if (PHP_PDO_CASSANDRA != "no") {
+	EXTENSION("pdo_cassandra", "pdo_cassandra.c");
+}
+
