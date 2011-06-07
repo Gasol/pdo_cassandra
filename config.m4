@@ -6,6 +6,7 @@ PHP_ARG_WITH(pdo-cassandra, for pdo_cassandra support,
 [  --with-pdo-cassandra             Include pdo_cassandra support])
 
 if test "$PHP_PDO_CASSANDRA" != "no"; then
+  PHP_REQUIRE_CXX()
 
   if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
     AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
@@ -55,8 +56,9 @@ if test "$PHP_PDO_CASSANDRA" != "no"; then
   dnl ])
   dnl
   PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $PDO_CASSANDRA_DIR, PDO_CASSANDRA_SHARED_LIBADD)
+  PHP_ADD_LIBRARY(stdc++, , PDO_CASSANDRA_SHARED_LIBADD)
   AC_DEFINE(HAVE_PDO_CASSANDRALIB,1,[ ])
   PHP_SUBST(PDO_CASSANDRA_SHARED_LIBADD)
 
-  PHP_NEW_EXTENSION(pdo_cassandra, pdo_cassandra.c, $ext_shared,, -I$pdo_cv_inc_path)
+  PHP_NEW_EXTENSION(pdo_cassandra, pdo_cassandra.cpp, $ext_shared,, -I$pdo_cv_inc_path)
 fi
