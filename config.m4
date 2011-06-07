@@ -20,8 +20,8 @@ if test "$PHP_PDO_CASSANDRA" != "no"; then
 		fi
 	])
 
-  SEARCH_PATH="/usr/local /usr"     # you might want to change this
-  SEARCH_FOR="Cassandra.h"  # you most likely want to change this
+  SEARCH_PATH="/usr/local /usr"
+  SEARCH_FOR="Cassandra.h"
   if test -r $PHP_PDO_CASSANDRA/$SEARCH_FOR; then # path given as parameter
     PDO_CASSANDRA_DIR=$PHP_PDO_CASSANDRA
   else # search default path list
@@ -41,6 +41,23 @@ if test "$PHP_PDO_CASSANDRA" != "no"; then
 
   PHP_ADD_INCLUDE($PDO_CASSANDRA_DIR)
 
+  SEARCH_PATH="/usr/local/include /usr/include /usr/include/thrift"
+  SEARCH_FOR="Thrift.h"
+  AC_MSG_CHECKING([for thrift files in default path])
+  for i in $SEARCH_PATH ; do
+    if test -r $i/$SEARCH_FOR; then
+      THRIFT_DIR=$i
+      AC_MSG_RESULT(found in $i)
+    fi
+  done
+
+  if test -z "$THRIFT_DIR"; then
+    AC_MSG_RESULT([not found])
+    AC_MSG_ERROR([Please install the thrift development files.])
+  fi
+
+  PHP_ADD_INCLUDE($THRIFT_DIR)
+
   dnl # --with-pdo_cassandra -> check for lib and symbol presence
   LIBNAME=cassandra
   dnl LIBSYMBOL=pdo_cassandra # you most likely want to change this
@@ -57,6 +74,7 @@ if test "$PHP_PDO_CASSANDRA" != "no"; then
   dnl
   PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $PDO_CASSANDRA_DIR, PDO_CASSANDRA_SHARED_LIBADD)
   PHP_ADD_LIBRARY(stdc++, , PDO_CASSANDRA_SHARED_LIBADD)
+  PHP_ADD_LIBRARY(thrift, , PDO_CASSANDRA_SHARED_LIBADD)
   AC_DEFINE(HAVE_PDO_CASSANDRALIB,1,[ ])
   PHP_SUBST(PDO_CASSANDRA_SHARED_LIBADD)
 

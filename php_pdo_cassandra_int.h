@@ -21,4 +21,6 @@
 #ifndef PHP_PDO_CASSANDRA_INT_H
 #define PHP_PDO_CASSANDRA_INT_H
 
+#include "Cassandra.h"
+
 #endif
