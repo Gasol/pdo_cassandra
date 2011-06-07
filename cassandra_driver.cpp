@@ -36,7 +36,20 @@ static int cassandra_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_l
 
 static long cassandra_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC)
 {
-	return -1;
+	pdo_cassandra_db_handle *H = (pdo_cassandra_db_handle *)dbh->driver_data;
+
+	CqlResult result;
+	H->client.execute_cql_query(result, sql, Compression::NONE);
+
+	switch (result.type) {
+		case CqlResultType::ROWS:
+			return result.rows.size();
+		case CqlResultType::INT:
+			return result.num;
+		case CqlResultType::VOID:
+		default:
+			return 0;
+	}
 }
 
 static int cassandra_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype  TSRMLS_DC)
