@@ -10,14 +10,13 @@ if test "$PHP_PDO_CASSANDRA" != "no"; then
     AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
   fi
 
-	AC_CACHE_CHECK([for PDO Includes], pdo_cv_path, [
+	AC_CACHE_CHECK([for PDO Includes], pdo_cv_inc_path, [
 		if test -f $phpincludedir/ext/pdo/php_pdo_driver.h; then
-			pdo_cv_path=$phpincludedir/ext
+			pdo_cv_inc_path=$phpincludedir/ext
 		else
 			AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
 		fi
 	])
-	pdo_inc_path=$pdo_cv_path
 
   dnl # --with-pdo_cassandra -> check with-path
   dnl SEARCH_PATH="/usr/local /usr"     # you might want to change this
@@ -58,5 +57,5 @@ if test "$PHP_PDO_CASSANDRA" != "no"; then
   dnl
   dnl PHP_SUBST(PDO_CASSANDRA_SHARED_LIBADD)
 
-  PHP_NEW_EXTENSION(pdo_cassandra, pdo_cassandra.c, $ext_shared,, -I$pdo_inc_path)
+  PHP_NEW_EXTENSION(pdo_cassandra, pdo_cassandra.c, $ext_shared,, -I$pdo_cv_inc_path)
 fi
