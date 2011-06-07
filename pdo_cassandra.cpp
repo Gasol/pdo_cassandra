@@ -26,6 +26,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_pdo_cassandra.h"
+#include "php_pdo_cassandra_int.h"
 
 /* If you declare any globals in php_pdo_cassandra.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(pdo_cassandra)
