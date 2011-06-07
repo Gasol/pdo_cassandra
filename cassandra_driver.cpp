@@ -46,25 +46,22 @@ static int cassandra_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unq
 
 static int cassandra_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
 {
-	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC,
-			"unsupport function",
-			dbh->data_source);
+	char message[] = "unsupported function";
+	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, message);
 	return 0;
 }
 
 static int cassandra_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
 {
-	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC,
-			"unsupport function",
-			dbh->data_source);
+	char message[] = "unsupported function";
+	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, message);
 	return 0;
 }
 
 static int cassandra_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 {
-	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC,
-			"unsupport function",
-			dbh->data_source);
+	char message[] = "unsupported function";
+	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, message);
 	return 0;
 }
 
@@ -73,11 +70,10 @@ static int pdo_cassandra_set_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC
 	return 0;
 }
 
-static char *pdo_cassandra_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned int *len TSRMLS_DC)
+static char* pdo_cassandra_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned int *len TSRMLS_DC)
 {
-	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC,
-			"unsupport function",
-			dbh->data_source);
+	char message[] = "unsupported function";
+	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, message);
 	return "-1";
 }
 
