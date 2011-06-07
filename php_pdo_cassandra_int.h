@@ -22,11 +22,21 @@
 #define PHP_PDO_CASSANDRA_INT_H
 
 #include "Cassandra.h"
+#include <transport/TSocket.h>
+#include <transport/TBufferTransports.h>
+#include <protocol/TBinaryProtocol.h>
+#include <iostream>
 
+using namespace apache::thrift;
+using namespace apache::thrift::protocol;
+using namespace apache::thrift::transport;
 using namespace org::apache::cassandra;
+using namespace std;
 
 typedef struct {
-	CassandraClient *client;
+	CassandraClient client;
+	boost::shared_ptr<TTransport> transport;
+	boost::shared_ptr<TSocket> socket;
 } pdo_cassandra_db_handle;
 
 extern pdo_driver_t pdo_cassandra_driver;

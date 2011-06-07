@@ -14,16 +14,111 @@ END_EXTERN_C()
 #include "php_pdo_cassandra_int.h"
 #include "zend_exceptions.h"
 
-#include <transport/TSocket.h>
-#include <transport/TBufferTransports.h>
-#include <protocol/TBinaryProtocol.h>
-#include <iostream>
+static int cassandra_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
+{
+	pdo_cassandra_db_handle *H = (pdo_cassandra_db_handle *)dbh->driver_data;
 
-using namespace apache::thrift;
-using namespace apache::thrift::protocol;
-using namespace apache::thrift::transport;
-using namespace org::apache::cassandra;
-using namespace std;
+	if (H) {
+		if (H->transport->isOpen()) {
+			H->transport->close();
+		}
+		pefree(H, dbh->is_persistent);
+		dbh->driver_data = NULL;
+	}
+	return 0;
+}
+/* }}} */
+
+static int cassandra_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
+{
+	return 0;
+}
+
+static long cassandra_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC)
+{
+	return -1;
+}
+
+static int cassandra_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype  TSRMLS_DC)
+{
+	return 1;
+}
+
+static int cassandra_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC,
+			"unsupport function",
+			dbh->data_source);
+	return 0;
+}
+
+static int cassandra_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC,
+			"unsupport function",
+			dbh->data_source);
+	return 0;
+}
+
+static int cassandra_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC,
+			"unsupport function",
+			dbh->data_source);
+	return 0;
+}
+
+static int pdo_cassandra_set_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
+{
+	return 0;
+}
+
+static char *pdo_cassandra_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned int *len TSRMLS_DC)
+{
+	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC,
+			"unsupport function",
+			dbh->data_source);
+	return "-1";
+}
+
+static int pdo_cassandra_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC)
+{
+	return 1;
+}
+
+static int pdo_cassandra_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value TSRMLS_DC)
+{
+	return 1;
+}
+
+static const zend_function_entry *get_driver_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
+{
+	switch (kind) {
+		default:
+			return NULL;
+	}
+}
+
+static void pdo_cassandra_request_shutdown(pdo_dbh_t *dbh TSRMLS_DC)
+{
+}
+
+static struct pdo_dbh_methods cassandra_methods = {
+	cassandra_handle_closer,
+	cassandra_handle_preparer,
+	cassandra_handle_doer,
+	cassandra_handle_quoter,
+	cassandra_handle_begin,
+	cassandra_handle_commit,
+	cassandra_handle_rollback,
+	pdo_cassandra_set_attr,
+	pdo_cassandra_last_insert_id,
+	pdo_cassandra_fetch_error_func,
+	pdo_cassandra_get_attribute,
+	NULL,	/* check_liveness: not needed */
+	get_driver_methods,
+	pdo_cassandra_request_shutdown
+};
 
 static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
 {
@@ -59,7 +154,9 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 
 	try {
 		transport->open();
-		H->client = &client;
+		H->client = client;
+		H->transport = transport;
+		H->socket = socket;
 		if (strlen(dbh->username) && strlen(dbh->password)) {
 			AuthenticationRequest auth_request;
 			auth_request.credentials.insert(pair<string, string>("username", dbh->username));
@@ -78,7 +175,7 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 	ret = 1;
 
 cleanup:
-	//dbh->methods = &sqlite_methods;
+	dbh->methods = &cassandra_methods;
 
 	return ret;
 }
