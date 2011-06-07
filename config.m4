@@ -1,5 +1,6 @@
 dnl $Id$
 dnl config.m4 for extension pdo_cassandra
+dnl vim: set sw=2 ts=2 et:
 
 PHP_ARG_WITH(pdo-cassandra, for pdo_cassandra support,
 [  --with-pdo-cassandra             Include pdo_cassandra support])
