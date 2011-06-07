@@ -23,4 +23,12 @@
 
 #include "Cassandra.h"
 
+using namespace org::apache::cassandra;
+
+typedef struct {
+	CassandraClient *client;
+} pdo_cassandra_db_handle;
+
+extern pdo_driver_t pdo_cassandra_driver;
+
 #endif

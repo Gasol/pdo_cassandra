@@ -25,6 +25,10 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+BEGIN_EXTERN_C()
+#include "pdo/php_pdo.h"
+#include "pdo/php_pdo_driver.h"
+END_EXTERN_C()
 #include "php_pdo_cassandra.h"
 #include "php_pdo_cassandra_int.h"
 
@@ -97,7 +101,7 @@ PHP_MINIT_FUNCTION(pdo_cassandra)
 	/* If you have INI entries, uncomment these lines 
 	REGISTER_INI_ENTRIES();
 	*/
-	return SUCCESS;
+	return php_pdo_register_driver(&pdo_cassandra_driver);
 }
 /* }}} */
 
@@ -108,6 +112,7 @@ PHP_MSHUTDOWN_FUNCTION(pdo_cassandra)
 	/* uncomment this line if you have INI entries
 	UNREGISTER_INI_ENTRIES();
 	*/
+	php_pdo_unregister_driver(&pdo_cassandra_driver);
 	return SUCCESS;
 }
 /* }}} */
