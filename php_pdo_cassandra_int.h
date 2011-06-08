@@ -39,6 +39,11 @@ typedef struct {
 	boost::shared_ptr<TSocket> socket;
 } pdo_cassandra_db_handle;
 
+typedef struct {
+	pdo_cassandra_db_handle 	*H;
+} pdo_cassandra_stmt;
+
 extern pdo_driver_t pdo_cassandra_driver;
+extern struct pdo_stmt_methods cassandra_stmt_methods;
 
 #endif

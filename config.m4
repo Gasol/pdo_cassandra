@@ -78,6 +78,6 @@ if test "$PHP_PDO_CASSANDRA" != "no"; then
   AC_DEFINE(HAVE_PDO_CASSANDRALIB,1,[ ])
   PHP_SUBST(PDO_CASSANDRA_SHARED_LIBADD)
 
-  PHP_NEW_EXTENSION(pdo_cassandra, pdo_cassandra.cpp cassandra_driver.cpp, $ext_shared,, -I$pdo_cv_inc_path)
+  PHP_NEW_EXTENSION(pdo_cassandra, pdo_cassandra.cpp cassandra_driver.cpp cassandra_statement.cpp, $ext_shared,, -I$pdo_cv_inc_path)
   PHP_ADD_EXTENSION_DEP(pdo_cassandra, pdo)
 fi
