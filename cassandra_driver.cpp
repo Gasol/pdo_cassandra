@@ -38,6 +38,7 @@ static int cassandra_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_l
 	stmt->driver_data = S;
 	stmt->methods = &cassandra_stmt_methods;
 	stmt->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL|PDO_PLACEHOLDER_NAMED;
+
 	return 1;
 }
 
@@ -71,39 +72,6 @@ static int cassandra_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unq
 	return 1;
 }
 
-static int cassandra_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
-{
-	char message[] = "unsupported function";
-	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, message);
-	return 0;
-}
-
-static int cassandra_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
-{
-	char message[] = "unsupported function";
-	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, message);
-	return 0;
-}
-
-static int cassandra_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
-{
-	char message[] = "unsupported function";
-	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, message);
-	return 0;
-}
-
-static int pdo_cassandra_set_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
-{
-	return 0;
-}
-
-static char* pdo_cassandra_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned int *len TSRMLS_DC)
-{
-	char message[] = "unsupported function";
-	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, message);
-	return "-1";
-}
-
 static int pdo_cassandra_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC)
 {
 	return 1;
@@ -131,14 +99,14 @@ static struct pdo_dbh_methods cassandra_methods = {
 	cassandra_handle_preparer,
 	cassandra_handle_doer,
 	cassandra_handle_quoter,
-	cassandra_handle_begin,
-	cassandra_handle_commit,
-	cassandra_handle_rollback,
+	NULL, /* begin */
+	NULL, /* commit */
+	NULL, /* rollback */
 	pdo_cassandra_set_attr,
-	pdo_cassandra_last_insert_id,
+	NULL, /* last_insert_id */
 	pdo_cassandra_fetch_error_func,
 	pdo_cassandra_get_attribute,
-	NULL,	/* check_liveness: not needed */
+	NULL,	/* check_liveness */
 	get_driver_methods,
 	pdo_cassandra_request_shutdown
 };
