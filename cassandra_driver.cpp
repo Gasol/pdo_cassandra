@@ -31,7 +31,14 @@ static int cassandra_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 
 static int cassandra_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
 {
-	return 0;
+	pdo_cassandra_db_handle *H = (pdo_cassandra_db_handle *)dbh->driver_data;
+	pdo_cassandra_stmt *S = (pdo_cassandra_stmt *) ecalloc(1, sizeof(pdo_cassandra_stmt));
+
+	S->H = H;
+	stmt->driver_data = S;
+	stmt->methods = &cassandra_stmt_methods;
+	stmt->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL|PDO_PLACEHOLDER_NAMED;
+	return 1;
 }
 
 static long cassandra_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC)
