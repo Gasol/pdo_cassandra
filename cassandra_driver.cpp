@@ -39,7 +39,14 @@ static long cassandra_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len 
 	pdo_cassandra_db_handle *H = (pdo_cassandra_db_handle *)dbh->driver_data;
 
 	CqlResult result;
-	H->client.execute_cql_query(result, sql, Compression::NONE);
+	try {
+		H->client.execute_cql_query(result, sql, Compression::NONE);
+	} catch(InvalidRequestException &e) {
+		char *message = new char[e.why.size()+1];
+		strcpy(message, e.why.c_str());
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, message);
+		return -1;
+	}
 
 	switch (result.type) {
 		case CqlResultType::ROWS:
