@@ -14,7 +14,7 @@ END_EXTERN_C()
 #include "php_pdo_cassandra_int.h"
 #include "zend_exceptions.h"
 
-static int cassandra_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
+static int cassandra_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 {
 	pdo_cassandra_db_handle *H = (pdo_cassandra_db_handle *)dbh->driver_data;
 
@@ -27,7 +27,6 @@ static int cassandra_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
 static int cassandra_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
 {
@@ -37,7 +36,8 @@ static int cassandra_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_l
 	S->H = H;
 	stmt->driver_data = S;
 	stmt->methods = &cassandra_stmt_methods;
-	stmt->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL|PDO_PLACEHOLDER_NAMED;
+	stmt->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
+	stmt->column_count = 0;
 
 	return 1;
 }
@@ -50,8 +50,7 @@ static long cassandra_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len 
 	try {
 		H->client.execute_cql_query(result, sql, Compression::NONE);
 	} catch(InvalidRequestException &e) {
-		char *message = new char[e.why.size()+1];
-		strcpy(message, e.why.c_str());
+		char *message = const_cast<char *>(e.why.c_str());
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, message);
 		return -1;
 	}
@@ -82,6 +81,11 @@ static int pdo_cassandra_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_v
 	return 1;
 }
 
+static int pdo_cassandra_set_attribute(pdo_dbh_t *dbh, long attr, zval *return_value TSRMLS_DC)
+{
+	return 1;
+}
+
 static const zend_function_entry *get_driver_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 {
 	switch (kind) {
@@ -98,20 +102,20 @@ static struct pdo_dbh_methods cassandra_methods = {
 	cassandra_handle_closer,
 	cassandra_handle_preparer,
 	cassandra_handle_doer,
-	cassandra_handle_quoter,
+	NULL, /* cassandra_handle_quoter, */
 	NULL, /* begin */
 	NULL, /* commit */
 	NULL, /* rollback */
-	pdo_cassandra_set_attr,
+	NULL, /* pdo_cassandra_set_attribute, */
 	NULL, /* last_insert_id */
-	pdo_cassandra_fetch_error_func,
-	pdo_cassandra_get_attribute,
+	NULL, /* pdo_cassandra_fetch_error_func, */
+	NULL, /* pdo_cassandra_get_attribute, */
 	NULL,	/* check_liveness */
 	get_driver_methods,
-	pdo_cassandra_request_shutdown
+	NULL /* pdo_cassandra_request_shutdown */
 };
 
-static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
+static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC)
 {
 	pdo_cassandra_db_handle *H;
 	int i, ret = 0;
@@ -147,18 +151,26 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 		transport->open();
 		H->client = client;
 		H->transport = transport;
-		H->socket = socket;
-		if (strlen(dbh->username) && strlen(dbh->password)) {
+
+		if (dbh->username && dbh->password) {
 			AuthenticationRequest auth_request;
 			auth_request.credentials.insert(pair<string, string>("username", dbh->username));
 			auth_request.credentials.insert(pair<string, string>("password", dbh->password));
 			client.login(auth_request);
 		}
-		//transport->close();
-	} catch (InvalidRequestException &e) {
-		cout << "Error: %s\n" << e.why.c_str();
-	}
 
+		if (keyspace) {
+			CqlResult result;
+			char *cql = new char[strlen(keyspace)+5];
+			sprintf(cql, "USE %s\0", keyspace);
+			H->client.execute_cql_query(result, cql, Compression::NONE);
+			delete [] cql;
+		}
+	} catch (InvalidRequestException &e) {
+		char *message = const_cast<char *>(e.why.c_str());
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, message);
+		goto cleanup;
+	}
 
 	dbh->alloc_own_columns = 1;
 	dbh->max_escaped_char_length = 2;
@@ -170,7 +182,6 @@ cleanup:
 
 	return ret;
 }
-/* }}} */
 
 pdo_driver_t pdo_cassandra_driver = {
 	PDO_DRIVER_HEADER(cassandra),

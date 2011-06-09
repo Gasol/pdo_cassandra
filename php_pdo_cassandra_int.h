@@ -36,11 +36,13 @@ using namespace std;
 typedef struct {
 	CassandraClient client;
 	boost::shared_ptr<TTransport> transport;
-	boost::shared_ptr<TSocket> socket;
 } pdo_cassandra_db_handle;
 
 typedef struct {
 	pdo_cassandra_db_handle 	*H;
+	CqlResult result;
+	int index;
+	bool ignore_column_count;
 } pdo_cassandra_stmt;
 
 extern pdo_driver_t pdo_cassandra_driver;
