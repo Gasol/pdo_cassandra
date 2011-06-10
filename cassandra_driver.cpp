@@ -148,9 +148,9 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 	CassandraClient client(protocol);
 
 	try {
-		transport->open();
 		H->client = client;
 		H->transport = transport;
+		transport->open();
 
 		if (dbh->username && dbh->password) {
 			AuthenticationRequest auth_request;
@@ -168,6 +168,10 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 		}
 	} catch (InvalidRequestException &e) {
 		char *message = const_cast<char *>(e.why.c_str());
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, message);
+		goto cleanup;
+	} catch (TTransportException &e) {
+		char *message = const_cast<char *>(e.what());
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, message);
 		goto cleanup;
 	}

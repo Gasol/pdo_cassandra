@@ -94,13 +94,20 @@ static void php_pdo_cassandra_init_globals(zend_pdo_cassandra_globals *pdo_cassa
 */
 /* }}} */
 
+void cassandra_log_err(const char *message)
+{
+	php_log_err(const_cast<char *>(message));
+}
+
 /* {{{ PHP_MINIT_FUNCTION
  */
+
 PHP_MINIT_FUNCTION(pdo_cassandra)
 {
 	/* If you have INI entries, uncomment these lines 
 	REGISTER_INI_ENTRIES();
 	*/
+	GlobalOutput.setOutputFunction(&cassandra_log_err);
 	return php_pdo_register_driver(&pdo_cassandra_driver);
 }
 /* }}} */
