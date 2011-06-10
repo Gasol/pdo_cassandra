@@ -182,6 +182,12 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 	ret = 1;
 
 cleanup:
+	for (i = 0; i < sizeof(vars)/sizeof(vars[0]); i++) {
+		if (vars[i].freeme) {
+			efree(vars[i].optval);
+		}
+	}
+
 	dbh->methods = &cassandra_methods;
 
 	return ret;
