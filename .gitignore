@@ -29,4 +29,5 @@ modules/
 pdo_cassandra.la
 pdo_cassandra.lo
 run-tests.php
-
+php_test_results_*.txt
+tmp-php.ini
