@@ -50,7 +50,7 @@ static long cassandra_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len 
 	try {
 		H->client.execute_cql_query(result, sql, Compression::NONE);
 	} catch(InvalidRequestException &e) {
-		char *message = const_cast<char *>(e.why.c_str());
+		char *message = estrdup(e.what());
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, message);
 		return -1;
 	}
@@ -167,12 +167,12 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 			delete [] cql;
 		}
 	} catch (InvalidRequestException &e) {
-		char *message = const_cast<char *>(e.why.c_str());
-		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, message);
+		char *message = estrdup(e.what());
+		zend_throw_exception(php_pdo_get_exception(), message, 0 TSRMLS_CC);
 		goto cleanup;
 	} catch (TTransportException &e) {
-		char *message = const_cast<char *>(e.what());
-		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, message);
+		char *message = estrdup(e.what());
+		zend_throw_exception(php_pdo_get_exception(), message, 0 TSRMLS_CC);
 		goto cleanup;
 	}
 
