@@ -31,6 +31,9 @@ pdo_cassandra.lo
 run-tests.php
 php_test_results_*.txt
 tmp-php.ini
-/tests/*
-!/tests/*.phpt
-!/tests/*.inc
+/tests/*.php
+/tests/*.log
+/tests/*.exp
+/tests/*.out
+/tests/*.diff
+/tests/config.inc
