@@ -179,7 +179,11 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 		char *message = estrdup(e.what());
 		zend_throw_exception(php_pdo_get_exception(), message, 0 TSRMLS_CC);
 		goto cleanup;
-	}
+	} catch (TApplicationException &e) {
+		char *message = estrdup(e.what());
+		zend_throw_exception(php_pdo_get_exception(), message, 0 TSRMLS_CC);
+		goto cleanup;
+    }
 
 	dbh->alloc_own_columns = 1;
 	dbh->max_escaped_char_length = 2;
