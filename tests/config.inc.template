@@ -1,6 +1,7 @@
-$config['ENV']['PDO_CASSANDRA_TEST_DSN'] = 'cassandra:host=localhost;port=9160';
-$config['ENV']['PDO_CASSANDRA_TEST_ADMIN_USER'] = 'admin';
-$config['ENV']['PDO_CASSANDRA_TEST_ADMIN_PASS'] = 'adminpass';
+$config['ENV']['PDO_CASSANDRA_TEST_HOST'] = 'localhost';
+$config['ENV']['PDO_CASSANDRA_TEST_PORT'] = 9160;
+$config['ENV']['PDO_CASSANDRA_TEST_USER'] = 'admin';
+$config['ENV']['PDO_CASSANDRA_TEST_PASS'] = 'adminpass';
 $config['ENV']['PDO_CASSANDRA_TEST_KEYSPACE'] = 'Keyspace1';
 $config['ENV']['PDO_CASSANDRA_TEST_COLUMNFAMILY'] = 'TestCF';
 
