@@ -1,5 +1,3 @@
-<?php # vim: ft=php
-
 $config['ENV']['PDO_CASSANDRA_TEST_DSN'] = 'cassandra:host=localhost;port=9160';
 $config['ENV']['PDO_CASSANDRA_TEST_ADMIN_USER'] = 'admin';
 $config['ENV']['PDO_CASSANDRA_TEST_ADMIN_PASS'] = 'adminpass';
