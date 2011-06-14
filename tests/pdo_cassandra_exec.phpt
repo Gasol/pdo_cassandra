@@ -21,11 +21,18 @@ try {
 
 echo $db->exec("CREATE KEYSPACE $keyspace WITH strategy_class = 'org.apache.cassandra.locator.SimpleStrategy' AND strategy_options:replication_factor = 1") . PHP_EOL;
 echo $db->exec("USE $keyspace") . PHP_EOL;
-echo $db->exec("CREATE COLUMNFAMILY $columnFamily (KEY text PRIMARY KEY, col text)") . PHP_EOL;
-echo $db->exec("INSERT INTO $columnFamily (KEY, col) VALUES ('testkey', 'testtext')") . PHP_EOL;
-$stmt = $db->query("SELECT KEY, col FROM $columnFamily");
+echo $db->exec("CREATE COLUMNFAMILY $columnFamily (KEY text PRIMARY KEY, col1 text)") . PHP_EOL;
+echo $db->exec("INSERT INTO $columnFamily (KEY, col1) VALUES ('a', 'text1')") . PHP_EOL;
+echo $db->exec("INSERT INTO $columnFamily (KEY, col1, col2) VALUES ('b', 'text1', 'text2')") . PHP_EOL;
+$stmt = $db->query("SELECT * FROM $columnFamily");
+do {
+    $data = $stmt->fetchAll();
+    var_dump($data);
+} while ($stmt->nextRowset());
 var_dump($stmt->fetchAll());
-$stmt = $db->query("SELECT KEY, col FROM $columnFamily WHERE KEY = 'testkey'");
+$stmt = $db->query("SELECT * FROM $columnFamily WHERE KEY = 'a'");
+var_dump($stmt->fetchAll());
+$stmt = $db->query("SELECT * FROM $columnFamily WHERE KEY = 'b'");
 var_dump($stmt->fetchAll());
 echo $db->exec("DROP KEYSPACE $keyspace") . PHP_EOL;
 
@@ -35,30 +42,65 @@ echo $db->exec("DROP KEYSPACE $keyspace") . PHP_EOL;
 0
 0
 0
+0
 array(1) {
   [0]=>
   array(4) {
     ["KEY"]=>
-    string(7) "testkey"
+    string(1) "a"
     [0]=>
-    string(7) "testkey"
-    ["col"]=>
-    string(8) "testtext"
+    string(1) "a"
+    ["col1"]=>
+    string(5) "text1"
     [1]=>
-    string(8) "testtext"
+    string(5) "text1"
+  }
+}
+array(1) {
+  [0]=>
+  array(6) {
+    ["KEY"]=>
+    string(1) "b"
+    [0]=>
+    string(1) "b"
+    ["col1"]=>
+    string(5) "text1"
+    [1]=>
+    string(5) "text1"
+    ["col2"]=>
+    string(5) "text2"
+    [2]=>
+    string(5) "text2"
   }
 }
 array(1) {
   [0]=>
   array(4) {
     ["KEY"]=>
-    string(7) "testkey"
+    string(1) "a"
     [0]=>
-    string(7) "testkey"
-    ["col"]=>
-    string(8) "testtext"
+    string(1) "a"
+    ["col1"]=>
+    string(5) "text1"
     [1]=>
-    string(8) "testtext"
+    string(5) "text1"
+  }
+}
+array(1) {
+  [0]=>
+  array(6) {
+    ["KEY"]=>
+    string(1) "b"
+    [0]=>
+    string(1) "b"
+    ["col1"]=>
+    string(5) "text1"
+    [1]=>
+    string(5) "text1"
+    ["col2"]=>
+    string(5) "text2"
+    [2]=>
+    string(5) "text2"
   }
 }
 0
