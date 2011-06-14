@@ -19,7 +19,7 @@ static int cassandra_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 	pdo_cassandra_db_handle *H = (pdo_cassandra_db_handle *)dbh->driver_data;
 
 	if (H) {
-		if (H->transport->isOpen()) {
+		if (H->transport != NULL && H->transport->isOpen()) {
 			H->transport->close();
 		}
 		pefree(H, dbh->is_persistent);
@@ -142,12 +142,17 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 		port = atoi(vars[2].optval);
 	}
 
-	boost::shared_ptr<TSocket> socket(new TSocket(host, port));
-	boost::shared_ptr<TTransport> transport(new TFramedTransport(socket));
-	boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
-	CassandraClient client(protocol);
+    if (host == NULL) {
+        zend_throw_exception(php_pdo_get_exception(), "invalid data source name", 0 TSRMLS_CC);
+        goto cleanup;
+    }
 
 	try {
+        boost::shared_ptr<TSocket> socket(new TSocket(host, port));
+        boost::shared_ptr<TTransport> transport(new TFramedTransport(socket));
+        boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
+        CassandraClient client(protocol);
+
 		H->client = client;
 		H->transport = transport;
 		transport->open();
