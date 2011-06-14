@@ -24,14 +24,6 @@
 extern zend_module_entry pdo_cassandra_module_entry;
 #define phpext_pdo_cassandra_ptr &pdo_cassandra_module_entry
 
-#ifdef PHP_WIN32
-#	define PHP_PDO_CASSANDRA_API __declspec(dllexport)
-#elif defined(__GNUC__) && __GNUC__ >= 4
-#	define PHP_PDO_CASSANDRA_API __attribute__ ((visibility("default")))
-#else
-#	define PHP_PDO_CASSANDRA_API
-#endif
-
 #ifdef ZTS
 #include "TSRM.h"
 #endif
