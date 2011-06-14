@@ -59,8 +59,8 @@ zend_module_entry pdo_cassandra_module_entry = {
 	pdo_cassandra_functions,
 	PHP_MINIT(pdo_cassandra),
 	PHP_MSHUTDOWN(pdo_cassandra),
-	PHP_RINIT(pdo_cassandra),		/* Replace with NULL if there's nothing to do at request start */
-	PHP_RSHUTDOWN(pdo_cassandra),	/* Replace with NULL if there's nothing to do at request end */
+	NULL,		/* Replace with NULL if there's nothing to do at request start */
+	NULL,		/* Replace with NULL if there's nothing to do at request end */
 	PHP_MINFO(pdo_cassandra),
 #if ZEND_MODULE_API_NO >= 20010901
 	"0.1", /* Replace with version number for your extension */
@@ -124,23 +124,6 @@ PHP_MSHUTDOWN_FUNCTION(pdo_cassandra)
 }
 /* }}} */
 
-/* Remove if there's nothing to do at request start */
-/* {{{ PHP_RINIT_FUNCTION
- */
-PHP_RINIT_FUNCTION(pdo_cassandra)
-{
-	return SUCCESS;
-}
-/* }}} */
-
-/* Remove if there's nothing to do at request end */
-/* {{{ PHP_RSHUTDOWN_FUNCTION
- */
-PHP_RSHUTDOWN_FUNCTION(pdo_cassandra)
-{
-	return SUCCESS;
-}
-/* }}} */
 
 /* {{{ PHP_MINFO_FUNCTION
  */
