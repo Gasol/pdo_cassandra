@@ -2,8 +2,6 @@
 
 class CassandraPDOTest
 {
-    const DEFAULT_CONFIG_FILE = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'config.inc';
-
     public static function factory($file = NULL)
     {
         self::loadConfig($file);
@@ -22,7 +20,7 @@ class CassandraPDOTest
     protected static function loadConfig($file = NULL)
     {
         if (is_null($file)) {
-            $file = DEFAULT_CONFIG_FILE;
+            $file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'config.inc';
         }
         if (file_exists($file)) {
             $data = file_get_contents($file);
