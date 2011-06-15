@@ -1,5 +1,5 @@
 --TEST--
-Cassandra PDO->__construct()
+Cassandra PDO->exec()
 --SKIPIF--
 <?php
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'cassandra_pdo_test.inc');
