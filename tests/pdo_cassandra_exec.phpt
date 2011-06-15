@@ -73,6 +73,8 @@ array(1) {
     string(5) "text2"
   }
 }
+array(0) {
+}
 array(1) {
   [0]=>
   array(4) {
