@@ -46,4 +46,4 @@ typedef struct {
 extern pdo_driver_t pdo_cassandra_driver;
 extern struct pdo_stmt_methods cassandra_stmt_methods;
 
-#endif
+#endif // PHP_PDO_CASSANDRA_INT_H
