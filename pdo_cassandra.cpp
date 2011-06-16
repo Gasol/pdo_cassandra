@@ -12,11 +12,9 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author:                                                              |
+  | Author: Gasol Wu <gasol.wu@gmail.com>                                |
   +----------------------------------------------------------------------+
 */
-
-/* $Id: header 297205 2010-03-30 21:09:07Z johannes $ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"

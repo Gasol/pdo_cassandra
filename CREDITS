@@ -1,1 +1,2 @@
-pdo_cassandra
+PDO Driver for Cassandra
+Gasol Wu <gasol.wu@gmail.com>
