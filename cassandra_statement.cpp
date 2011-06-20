@@ -41,7 +41,7 @@ static int pdo_cassandra_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 	CqlResult result;
 	try {
-		H->client.execute_cql_query(result, stmt->query_string, Compression::NONE);
+		H->client.execute_cql_query(result, stmt->active_query_string, Compression::NONE);
 	} catch(InvalidRequestException &e) {
 		char *message = const_cast<char *>(e.why.c_str());
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, message);

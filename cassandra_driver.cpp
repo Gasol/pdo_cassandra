@@ -53,7 +53,7 @@ static int cassandra_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_l
 	S->H = H;
 	stmt->driver_data = S;
 	stmt->methods = &cassandra_stmt_methods;
-	stmt->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
+	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
 	stmt->column_count = 0;
 
 	return 1;
@@ -85,6 +85,9 @@ static long cassandra_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len 
 
 static int cassandra_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype  TSRMLS_DC)
 {
+    *quoted = (char *) safe_emalloc(2, unquotedlen, 3);
+    snprintf(*quoted, 2 * unquotedlen + 3, "'%s'", unquoted);
+    *quotedlen = strlen(*quoted);
 	return 1;
 }
 
@@ -119,7 +122,7 @@ static struct pdo_dbh_methods cassandra_methods = {
 	cassandra_handle_closer,
 	cassandra_handle_preparer,
 	cassandra_handle_doer,
-	NULL, /* cassandra_handle_quoter, */
+	cassandra_handle_quoter,
 	NULL, /* begin */
 	NULL, /* commit */
 	NULL, /* rollback */
