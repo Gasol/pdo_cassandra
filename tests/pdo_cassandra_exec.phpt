@@ -45,31 +45,21 @@ echo $db->exec("DROP KEYSPACE $keyspace") . PHP_EOL;
 0
 array(1) {
   [0]=>
-  array(4) {
+  array(2) {
     ["KEY"]=>
     string(1) "a"
-    [0]=>
-    string(1) "a"
     ["col1"]=>
-    string(5) "text1"
-    [1]=>
     string(5) "text1"
   }
 }
 array(1) {
   [0]=>
-  array(6) {
+  array(3) {
     ["KEY"]=>
-    string(1) "b"
-    [0]=>
     string(1) "b"
     ["col1"]=>
     string(5) "text1"
-    [1]=>
-    string(5) "text1"
     ["col2"]=>
-    string(5) "text2"
-    [2]=>
     string(5) "text2"
   }
 }
@@ -77,31 +67,21 @@ array(0) {
 }
 array(1) {
   [0]=>
-  array(4) {
+  array(2) {
     ["KEY"]=>
     string(1) "a"
-    [0]=>
-    string(1) "a"
     ["col1"]=>
-    string(5) "text1"
-    [1]=>
     string(5) "text1"
   }
 }
 array(1) {
   [0]=>
-  array(6) {
+  array(3) {
     ["KEY"]=>
-    string(1) "b"
-    [0]=>
     string(1) "b"
     ["col1"]=>
     string(5) "text1"
-    [1]=>
-    string(5) "text1"
     ["col2"]=>
-    string(5) "text2"
-    [2]=>
     string(5) "text2"
   }
 }
