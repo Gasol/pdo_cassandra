@@ -138,6 +138,7 @@ static int pdo_cassandra_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, u
 static int pdo_cassandra_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_value TSRMLS_DC)
 {
 	pdo_cassandra_stmt *S = (pdo_cassandra_stmt*)stmt->driver_data;
+	array_init(return_value);
 	return SUCCESS;
 }
 
@@ -168,7 +169,7 @@ struct pdo_stmt_methods cassandra_stmt_methods = {
 	NULL, /* pdo_cassandra_stmt_param_hook, */
 	NULL, /* set_attr */
 	NULL, /* get_attr */
-	NULL, /* pdo_cassandra_stmt_col_meta, */
+	pdo_cassandra_stmt_col_meta,
 	pdo_cassandra_stmt_next_rowset,
 	NULL /* pdo_cassandra_stmt_cursor_closer */
 };
