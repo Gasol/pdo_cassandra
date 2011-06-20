@@ -38,7 +38,7 @@ typedef struct {
 
 typedef struct {
 	pdo_cassandra_db_handle 	*H;
-	CqlResult result;
+	CqlResult *result;
 	int index;
 	bool ignore_column_count;
 } pdo_cassandra_stmt;
