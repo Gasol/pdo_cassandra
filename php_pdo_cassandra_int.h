@@ -50,7 +50,9 @@ extern pdo_driver_t pdo_cassandra_driver;
 extern struct pdo_stmt_methods cassandra_stmt_methods;
 
 BEGIN_EXTERN_C()
-char* scan_columnfamily(char* cql);
+char* scan_columnfamily(char *cql);
+int64_t deserializeLong(char *str);
+char* ltoa(long N, char *str);
 END_EXTERN_C()
 
 #endif // PHP_PDO_CASSANDRA_INT_H
