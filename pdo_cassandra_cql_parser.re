@@ -15,42 +15,41 @@
   | Author: Gasol Wu <gasol.wu@gmail.com>                                |
   +----------------------------------------------------------------------+
 */
+#include "php.h"
 
-#ifndef PHP_PDO_CASSANDRA_INT_H
-#define PHP_PDO_CASSANDRA_INT_H
+#define YYCTYPE         unsigned char
+#define YYCURSOR        cql
+#define YYLIMIT         cql
+#define YYMARKER		q
+#define YYFILL(n)
 
-#include "Cassandra.h"
-#include <transport/TSocket.h>
-#include <transport/TBufferTransports.h>
-#include <protocol/TBinaryProtocol.h>
-#include <iostream>
+char *tokendup(char *str)
+{
+	int len = 0;
+	char *begin = str;
+    char ch = NULL;
+	while (ch = *str) {
+        if (ch == ' ') {
+            break;
+        }
+        ++len;
+		++str;
+	}
+	if (len > 0) {
+		char *ret = emalloc(len+1);
+		strncpy(ret, begin, len);
+        ret[len] = '\0';
+		return ret;
+	} else {
+		return NULL;
+	}
+}
 
-using namespace apache::thrift;
-using namespace apache::thrift::protocol;
-using namespace apache::thrift::transport;
-using namespace org::apache::cassandra;
-using namespace std;
-
-typedef struct {
-	CassandraClient client;
-	boost::shared_ptr<TTransport> transport;
-    string *keyspace;
-    map<string, KsDef> *ks_defs;
-} pdo_cassandra_db_handle;
-
-typedef struct {
-	pdo_cassandra_db_handle 	*H;
-	CqlResult *result;
-    string *column_family;
-	int index;
-	bool ignore_column_count;
-} pdo_cassandra_stmt;
-
-extern pdo_driver_t pdo_cassandra_driver;
-extern struct pdo_stmt_methods cassandra_stmt_methods;
-
-BEGIN_EXTERN_C()
-char* scan_columnfamily(char* cql);
-END_EXTERN_C()
-
-#endif // PHP_PDO_CASSANDRA_INT_H
+char *scan_columnfamily(char *cql)
+{
+	char *q;
+/*!re2c
+	[ ]*'select'[ ]+.+[ ]+'from'[ ]+        {return tokendup(YYCURSOR);}
+	[^]				{return (char*) 0;}
+ */
+}

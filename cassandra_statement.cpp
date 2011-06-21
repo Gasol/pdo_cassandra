@@ -33,6 +33,9 @@ static int pdo_cassandra_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 	if (S->result) {
 		delete S->result;
 	}
+    if (S->column_family) {
+        delete S->column_family;
+    }
 	efree(S);
 	return 1;
 }
@@ -44,6 +47,12 @@ static int pdo_cassandra_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 	CqlResult *result = new CqlResult();
 	try {
+        if (H->ks_defs->find(*H->keyspace) == H->ks_defs->end()) {
+            KsDef ksdef;
+            H->client.describe_keyspace(ksdef, *H->keyspace);
+            (*H->ks_defs)[*H->keyspace] = ksdef;
+        }
+        *S->column_family = scan_columnfamily(stmt->active_query_string);
 		H->client.execute_cql_query(*result, stmt->active_query_string, Compression::NONE);
 	} catch(InvalidRequestException &e) {
 		char *message = const_cast<char *>(e.why.c_str());
@@ -74,6 +83,42 @@ static int pdo_cassandra_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_para
 		enum pdo_param_event event_type TSRMLS_DC)
 {
 	pdo_cassandra_stmt *S = (pdo_cassandra_stmt*)stmt->driver_data;
+
+    if (S && param->is_param) {
+        switch (event_type) {
+            case PDO_PARAM_EVT_ALLOC:
+                cout << "PDO_PARAM_EVT_ALLOC" << endl;
+                break;
+            case PDO_PARAM_EVT_FREE:
+                cout << "PDO_PARAM_EVT_FREE" << endl;
+                break;
+            case PDO_PARAM_EVT_EXEC_PRE:
+                cout << "PDO_PARAM_EVT_EXEC_PRE" << endl;
+                cout << "paramno: " << param->paramno << endl;
+                cout << "paramtype: " << param->param_type << endl;
+                cout << "parameter: " << param->parameter << endl;
+                switch (param->param_type) {
+                    case PDO_PARAM_STR:
+                        convert_to_string(param->parameter);
+                        break;
+                }
+                break;
+            case PDO_PARAM_EVT_EXEC_POST:
+                cout << "PDO_PARAM_EVT_EXEC_POST" << endl;
+                break;
+            case PDO_PARAM_EVT_FETCH_PRE:
+                cout << "PDO_PARAM_EVT_FETCH_PRE" << endl;
+                break;
+            case PDO_PARAM_EVT_FETCH_POST:
+                cout << "PDO_PARAM_EVT_FETCH_POST" << endl;
+                break;
+            case PDO_PARAM_EVT_NORMALIZE:
+                cout << "PDO_PARAM_EVT_NORMALIZE" << endl;
+                break;
+            default:
+                cout << "event_type: " << event_type << endl;
+        }
+    }
 	return 1;
 }
 
@@ -142,13 +187,44 @@ static int pdo_cassandra_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *retur
 {
 	pdo_cassandra_stmt *S = (pdo_cassandra_stmt*)stmt->driver_data;
 
-	if (!S->result) {
+	if (!stmt->executed || !S->result) {
 		return FAILURE;
 	}
 	if (colno >= S->result->rows.size()) {
 		return FAILURE;
 	}
 	array_init(return_value);
+    /*
+    zval *flags;
+	pdo_cassandra_db_handle *H = S->H;
+
+    map<string, KsDef>::iterator it = H->ks_defs->find(*H->keyspace);
+    if (it == H->ks_defs->end()) {
+        return FAILURE;
+    }
+
+    array_init(return_value);
+    MAKE_STD_ZVAL(flags);
+    array_init(flags);
+
+    KsDef ksdef = it->second;
+    for (vector<CfDef>::iterator it = ksdef.cf_defs.begin(); it != ksdef.cf_defs.end(); it++) {
+        CfDef cfdef = *it;
+        cout << "name: " << cfdef.name << endl;
+        cout << "column_type: " << cfdef.column_type << endl;
+        cout << "comparator_type: " << cfdef.comparator_type << endl;
+        cout << "sub_comparator_type: " << cfdef.subcomparator_type << endl;
+        cout << "column_metadata.size(): " << cfdef.column_metadata.size() << endl;
+        for (vector<ColumnDef>::iterator it = cfdef.column_metadata.begin(); it != cfdef.column_metadata.end(); it++) {
+            ColumnDef column_def = *it;
+            cout << "name: " << column_def.name << endl;
+            cout << "validation_class: " << column_def.validation_class << endl;
+            cout << "index_type: " << column_def.index_type << endl;
+            cout << "index_name: " << column_def.index_name << endl;
+        }
+    }
+    */
+
 	return SUCCESS;
 }
 
@@ -176,7 +252,7 @@ struct pdo_stmt_methods cassandra_stmt_methods = {
 	pdo_cassandra_stmt_fetch,
 	pdo_cassandra_stmt_describe,
 	pdo_cassandra_stmt_get_col,
-	NULL, /* pdo_cassandra_stmt_param_hook, */
+	pdo_cassandra_stmt_param_hook,
 	NULL, /* set_attr */
 	NULL, /* get_attr */
 	pdo_cassandra_stmt_col_meta,

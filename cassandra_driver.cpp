@@ -39,6 +39,12 @@ static int cassandra_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 		if (H->transport != NULL && H->transport->isOpen()) {
 			H->transport->close();
 		}
+        if (H->keyspace) {
+            delete H->keyspace;
+        }
+        if (H->ks_defs) {
+            delete H->ks_defs;
+        }
 		pefree(H, dbh->is_persistent);
 		dbh->driver_data = NULL;
 	}
@@ -51,6 +57,7 @@ static int cassandra_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_l
 	pdo_cassandra_stmt *S = (pdo_cassandra_stmt *) ecalloc(1, sizeof(pdo_cassandra_stmt));
 
 	S->H = H;
+    S->column_family = new string();
 	stmt->driver_data = S;
 	stmt->methods = &cassandra_stmt_methods;
 	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
@@ -153,6 +160,8 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 3);
 
 	H = (pdo_cassandra_db_handle*) pecalloc(1, sizeof(pdo_cassandra_db_handle), dbh->is_persistent);
+    H->keyspace = new string();
+    H->ks_defs = new map<string, KsDef>();
 
 	dbh->driver_data = H;
 
@@ -189,6 +198,7 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 			char *cql = new char[strlen(keyspace)+5];
 			sprintf(cql, "USE %s\0", keyspace);
 			H->client.execute_cql_query(result, cql, Compression::NONE);
+            *H->keyspace = keyspace;
 			delete [] cql;
 		}
 	} catch (InvalidRequestException &e) {
