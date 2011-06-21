@@ -90,6 +90,6 @@ using namespace org::apache::cassandra;],
   AC_DEFINE(HAVE_PDO_CASSANDRALIB,1,[ ])
   PHP_SUBST(PDO_CASSANDRA_SHARED_LIBADD)
 
-  PHP_NEW_EXTENSION(pdo_cassandra, pdo_cassandra.cpp pdo_cassandra_cql_parser.c cassandra_driver.cpp cassandra_statement.cpp, $ext_shared,, -I$pdo_cv_inc_path)
+  PHP_NEW_EXTENSION(pdo_cassandra, pdo_cassandra.cpp cassandra_cql_parser.c cassandra_driver.cpp cassandra_statement.cpp, $ext_shared,, -I$pdo_cv_inc_path)
   PHP_ADD_EXTENSION_DEP(pdo_cassandra, pdo)
 fi
