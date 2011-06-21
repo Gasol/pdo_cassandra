@@ -155,14 +155,40 @@ static int pdo_cassandra_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 		return 0;
 	}
 
+    pdo_cassandra_db_handle *H = S->H;
 	Column col = row.columns[colno];
+    char *name = NULL;
+    pdo_param_type param_type;
+
+    map<string, KsDef>::iterator ks_it = H->ks_defs->find(*H->keyspace);
+    if (ks_it != H->ks_defs->end()) {
+        KsDef ksdef = ks_it->second;
+        for (vector<CfDef>::iterator cf_it = ksdef.cf_defs.begin(); cf_it != ksdef.cf_defs.end(); cf_it++) {
+            CfDef cfdef = *cf_it;
+            if (cfdef.name == *S->column_family) {
+                if (cf_it->comparator_type == "org.apache.cassandra.db.marshal.UTF8Type" ||
+                        cf_it->comparator_type == "org.apache.cassandra.db.marshal.AsciiType") {
+                    name = estrdup(col.name.c_str());
+                    param_type = PDO_PARAM_STR;
+                }
+                /*
+                for (vector<ColumnDef>::iterator column_it = cf_it->column_metadata.begin(); column_it != cf_it->column_metadata.end(); column_it++) {
+                    ColumnDef column_def = *column_it;
+                    cout << "column name: " << column_def.name << endl;
+                    cout << "column validation_class: " << column_def.validation_class << endl;
+                }
+                */
+            }
+        }
+    }
+
 	pdo_column_data *col_data = &stmt->columns[colno];
 
-	col_data->name = estrdup(col.name.c_str());
-	col_data->namelen = strlen(col_data->name);
+	col_data->name = name;
+	col_data->namelen = strlen(name);
 	col_data->maxlen = 0xffffffff;
 	col_data->precision = 0;
-	col_data->param_type = PDO_PARAM_STR;
+	col_data->param_type = param_type;
 
 	return 1;
 }
@@ -170,6 +196,7 @@ static int pdo_cassandra_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 static int pdo_cassandra_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len, int *caller_frees TSRMLS_DC)
 {
 	pdo_cassandra_stmt *S = (pdo_cassandra_stmt*)stmt->driver_data;
+    pdo_cassandra_db_handle *H = S->H;
 
 	CqlRow row = S->result->rows[S->index];
 	if (colno >= row.columns.size()) {
@@ -177,7 +204,36 @@ static int pdo_cassandra_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, u
 	}
 
 	Column col = row.columns[colno];
-	*ptr = const_cast<char *>(col.value.c_str());
+
+    char *a = "test";
+    map<string, KsDef>::iterator ks_it = H->ks_defs->find(*H->keyspace);
+    if (ks_it != H->ks_defs->end()) {
+        KsDef ksdef = ks_it->second;
+        for (vector<CfDef>::iterator cf_it = ksdef.cf_defs.begin(); cf_it != ksdef.cf_defs.end(); cf_it++) {
+            CfDef cfdef = *cf_it;
+            if (cfdef.name == *S->column_family) {
+                for (vector<ColumnDef>::iterator column_it = cf_it->column_metadata.begin(); column_it != cf_it->column_metadata.end(); column_it++) {
+                    ColumnDef column_def = *column_it;
+                    if (col.name == column_def.name) {
+                        if (column_def.validation_class == "org.apache.cassandra.db.marshal.UTF8Type" ||
+                                column_def.validation_class == "org.apache.cassandra.db.marshal.AsciiType") {
+                            *ptr = const_cast<char *>(col.value.c_str());
+                        } else {
+                            *ptr = a;
+                        }
+                    } else if (col.name == "KEY") {
+                        if (column_def.validation_class == "org.apache.cassandra.db.marshal.UTF8Type" ||
+                                column_def.validation_class == "org.apache.cassandra.db.marshal.AsciiType") {
+                            *ptr = const_cast<char *>(col.value.c_str());
+                        } else {
+                            *ptr = a;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 	*len = strlen(*ptr);
 
 	return 1;
