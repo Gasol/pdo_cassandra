@@ -17,44 +17,13 @@
 */
 
 #include "php.h"
+#include<string>
 
-char* ltoa(long N, char *str)
-{
-    const size_t BUFSIZE = sizeof(int64_t) * 8 + 1;
-    register int i = 2;
-    long uarg;
-    char *tail, *head = str, buf[BUFSIZE];
-
-    tail = &buf[BUFSIZE - 1];           /* last character position      */
-    *tail-- = '\0';
-
-    if (N < 0L) {
-        *head++ = '-';
-        uarg    = -N;
-    } else {
-        uarg = N;
-    }
-
-    if (uarg) {
-        for (i = 1; uarg; ++i) {
-            register ldiv_t r;
-            r = ldiv(uarg, 10);
-            *tail-- = (char)(r.rem + ((9L < r.rem) ? ('A' - 10L) : '0'));
-            uarg = r.quot;
-        }
-    } else {
-        *tail-- = '0';
-    }
-
-    memcpy(head, ++tail, i);
-    return str;
-}
-
-int64_t deserializeLong(char *str)
+int64_t deserializeLong(std::string &str)
 {
     int64_t ret = 0;
     int64_t tmp = 0;
-    unsigned char *raw_array = (unsigned char *)str;
+    unsigned char *raw_array= reinterpret_cast<unsigned char *>(const_cast<char *>(str.c_str()));
     ret |= raw_array[7];
     tmp = raw_array[6];
     ret |= (tmp << 8);

@@ -19,17 +19,21 @@ try {
     // echo $e->getMessage() . PHP_EOL;
 }
 
-$db->exec("CREATE KEYSPACE $keyspace WITH strategy_class = 'org.apache.cassandra.locator.SimpleStrategy' AND strategy_options:replication_factor = 1") . PHP_EOL;
-$db->exec("USE $keyspace") . PHP_EOL;
-$db->exec("CREATE COLUMNFAMILY $columnFamily (KEY text PRIMARY KEY, col1 text)") . PHP_EOL;
-$stmt = $db->prepare("INSERT INTO $columnFamily (KEY, col1) VALUES (?, ?)");
+$db->exec("CREATE KEYSPACE $keyspace WITH strategy_class = 'org.apache.cassandra.locator.SimpleStrategy' AND strategy_options:replication_factor = 1");
+$db->exec("USE $keyspace");
+$db->exec("CREATE COLUMNFAMILY $columnFamily (KEY text PRIMARY KEY, col1 text, col2 int)");
+$db->exec("INSERT INTO $columnFamily (KEY, col1, col2) VALUES (2, 'text2', 2)");
+$stmt = $db->prepare("INSERT INTO $columnFamily (KEY, col1, col2) VALUES (?, ?, ?)");
 $stmt->bindValue(1, 1, PDO::PARAM_STR);
-$stmt->bindValue(2, 'text1', PDO::PARAM_STR);
+$stmt->bindValue(2, 'text1');
+//$stmt->bindValue(3, 2, PDO::PARAM_INT);
+$stmt->bindValue(3, 1);
 $stmt->execute();
 $stmt = $db->query("SELECT * FROM $columnFamily");
 do {
     $data = $stmt->fetchAll();
-    var_dump($data);
+    print_r($data);
+    //var_dump($data);
 } while ($stmt->nextRowset());
 var_dump($stmt->fetchAll());
 $db->exec("DROP KEYSPACE $keyspace") . PHP_EOL;

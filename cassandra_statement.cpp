@@ -91,28 +91,35 @@ static int pdo_cassandra_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_para
     DEBUG_OUTPUT("param_hook");
 	pdo_cassandra_stmt *S = (pdo_cassandra_stmt*)stmt->driver_data;
 
-    if (S && param->is_param) {
-        switch (event_type) {
-            case PDO_PARAM_EVT_ALLOC:
-                break;
-            case PDO_PARAM_EVT_FREE:
-                break;
-            case PDO_PARAM_EVT_EXEC_PRE:
+    switch (event_type) {
+        case PDO_PARAM_EVT_ALLOC:
+            DEBUG_OUTPUT("PDO_PARAM_EVT_ALLOC");
+            break;
+        case PDO_PARAM_EVT_FREE:
+            DEBUG_OUTPUT("PDO_PARAM_EVT_FREE");
+            break;
+        case PDO_PARAM_EVT_EXEC_PRE:
+            DEBUG_OUTPUT("PDO_PARAM_EVT_EXEC_PRE");
+            if (S && param->is_param) {
                 switch (param->param_type) {
                     case PDO_PARAM_STR:
                         convert_to_string(param->parameter);
                         break;
                 }
-                break;
-            case PDO_PARAM_EVT_EXEC_POST:
-                break;
-            case PDO_PARAM_EVT_FETCH_PRE:
-                break;
-            case PDO_PARAM_EVT_FETCH_POST:
-                break;
-            case PDO_PARAM_EVT_NORMALIZE:
-                break;
-        }
+            }
+            break;
+        case PDO_PARAM_EVT_EXEC_POST:
+            DEBUG_OUTPUT("PDO_PARAM_EVT_EXEC_POST");
+            break;
+        case PDO_PARAM_EVT_FETCH_PRE:
+            DEBUG_OUTPUT("PDO_PARAM_EVT_FETCH_PRE");
+            break;
+        case PDO_PARAM_EVT_FETCH_POST:
+            DEBUG_OUTPUT("PDO_PARAM_EVT_FETCH_POST");
+            break;
+        case PDO_PARAM_EVT_NORMALIZE:
+            DEBUG_OUTPUT("PDO_PARAM_EVT_NORMALIZE");
+            break;
     }
 	return 1;
 }
@@ -155,7 +162,7 @@ static int pdo_cassandra_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
     pdo_cassandra_db_handle *H = S->H;
 	Column col = row.columns[colno];
     char *name = NULL;
-    pdo_param_type param_type;
+    pdo_param_type param_type = PDO_PARAM_STR;
 
     map<string, KsDef>::iterator ks_it = H->ks_defs->find(*H->keyspace);
     if (ks_it != H->ks_defs->end()) {
@@ -163,18 +170,29 @@ static int pdo_cassandra_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
         for (vector<CfDef>::iterator cf_it = ksdef.cf_defs.begin(); cf_it != ksdef.cf_defs.end(); cf_it++) {
             CfDef cfdef = *cf_it;
             if (cfdef.name == *S->column_family) {
-                if (cfdef.comparator_type == "org.apache.cassandra.db.marshal.UTF8Type" ||
-                        cfdef.comparator_type == "org.apache.cassandra.db.marshal.AsciiType") {
-                    name = estrdup(col.name.c_str());
-                    param_type = PDO_PARAM_STR;
-                } else if (cfdef.comparator_type == "org.apache.cassandra.db.marshal.LongType") {
-                    int64_t long_value = deserializeLong(const_cast<char *>(col.name.c_str()));
-                    char value[sizeof(int64_t) * 8 + 1];
-                    name = ltoa(long_value, value);
-                    param_type = PDO_PARAM_INT;
+                if (col.name == "KEY") {
+                    if (cfdef.comparator_type == "org.apache.cassandra.db.marshal.UTF8Type" ||
+                            cfdef.comparator_type == "org.apache.cassandra.db.marshal.AsciiType") {
+                        name = estrdup(col.name.c_str());
+                    } else if (cfdef.comparator_type == "org.apache.cassandra.db.marshal.LongType") {
+                        int64_t long_value = deserializeLong(col.name);
+                        char value[sizeof(int64_t) * 8 + 1];
+                        name = ltoa(long_value, value, 10);
+                    } else {
+                        name = estrdup(col.name.c_str());
+                    }
                 } else {
-                    name = estrdup(col.name.c_str());
-                    param_type = PDO_PARAM_STR;
+                    name = const_cast<char *>(col.name.c_str());
+                    for (vector<ColumnDef>::iterator column_it = cfdef.column_metadata.begin(); column_it != cfdef.column_metadata.end(); column_it++) {
+                        ColumnDef column_def = *column_it;
+                        if (col.name == column_def.name) {
+                            if (column_def.validation_class == "org.apache.cassandra.db.marshal.UTF8Type" ||
+                                    column_def.validation_class == "org.apache.cassandra.db.marshal.AsciiType") {
+                            } else if (column_def.validation_class == "org.apache.cassandra.db.marshal.LongType") {
+                                param_type = PDO_PARAM_INT;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -203,6 +221,8 @@ static int pdo_cassandra_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, u
 	}
 
 	Column col = row.columns[colno];
+    struct pdo_column_data *co = &stmt->columns[colno];
+    int type = PDO_PARAM_TYPE(co->param_type);
 
     map<string, KsDef>::iterator ks_it = H->ks_defs->find(*H->keyspace);
     if (ks_it != H->ks_defs->end()) {
@@ -225,9 +245,10 @@ static int pdo_cassandra_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, u
                                     column_def.validation_class == "org.apache.cassandra.db.marshal.AsciiType") {
                                 *ptr = const_cast<char *>(col.value.c_str());
                             } else if (column_def.validation_class == "org.apache.cassandra.db.marshal.LongType") {
-                                int64_t long_value = deserializeLong(const_cast<char *>(col.value.c_str()));
+                                int64_t long_value = deserializeLong(col.value);
                                 char value[sizeof(int64_t) * 8 + 1];
-                                *ptr = ltoa(long_value, value);
+                                *ptr = ltoa(long_value, value, 10);
+                                *ptr = value;
                             } else {
                                 *ptr = const_cast<char *>(col.value.c_str());
                             }
