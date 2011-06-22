@@ -135,12 +135,10 @@ static int pdo_cassandra_stmt_fetch(pdo_stmt_t *stmt,
 				S->ignore_column_count = false;
 			} else {
 				--S->index;
-                DEBUG_OUTPUT("end_fetch0");
 				return 0;
 			}
 		}
 	}
-    DEBUG_OUTPUT("end_fetch1");
 	return 1;
 }
 
@@ -302,10 +300,8 @@ static int pdo_cassandra_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 	if (S->index < S->result->rows.size()) {
 		stmt->column_count = S->result->rows[S->index + 1].columns.size();
 		S->ignore_column_count = true;
-        DEBUG_OUTPUT("next_rowset1");
 		return 1;
 	} else {
-        DEBUG_OUTPUT("next_rowset0");
 		return 0;
 	}
 }
