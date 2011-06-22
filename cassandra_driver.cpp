@@ -33,6 +33,7 @@ END_EXTERN_C()
 
 static int cassandra_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 {
+    DEBUG_OUTPUT("closer");
 	pdo_cassandra_db_handle *H = (pdo_cassandra_db_handle *)dbh->driver_data;
 
 	if (H) {
@@ -53,6 +54,7 @@ static int cassandra_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 
 static int cassandra_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
 {
+    DEBUG_OUTPUT("preparer");
 	pdo_cassandra_db_handle *H = (pdo_cassandra_db_handle *)dbh->driver_data;
 	pdo_cassandra_stmt *S = (pdo_cassandra_stmt *) ecalloc(1, sizeof(pdo_cassandra_stmt));
 
@@ -68,6 +70,7 @@ static int cassandra_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_l
 
 static long cassandra_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC)
 {
+    DEBUG_OUTPUT("doser");
 	pdo_cassandra_db_handle *H = (pdo_cassandra_db_handle *)dbh->driver_data;
 
 	CqlResult result;
@@ -92,6 +95,7 @@ static long cassandra_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len 
 
 static int cassandra_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype  TSRMLS_DC)
 {
+    DEBUG_OUTPUT("quoter");
     *quoted = (char *) safe_emalloc(2, unquotedlen, 3);
     snprintf(*quoted, 2 * unquotedlen + 3, "'%s'", unquoted);
     *quotedlen = strlen(*quoted);

@@ -29,6 +29,7 @@ END_EXTERN_C()
 
 static int pdo_cassandra_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 {
+    DEBUG_OUTPUT("dtor");
 	pdo_cassandra_stmt *S = (pdo_cassandra_stmt*)stmt->driver_data;
 	if (S->result) {
 		delete S->result;
@@ -42,6 +43,7 @@ static int pdo_cassandra_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 
 static int pdo_cassandra_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 {
+    DEBUG_OUTPUT("execute");
 	pdo_cassandra_stmt *S = (pdo_cassandra_stmt*)stmt->driver_data;
 	pdo_cassandra_db_handle *H = S->H;
 
@@ -52,7 +54,11 @@ static int pdo_cassandra_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
             H->client.describe_keyspace(ksdef, *H->keyspace);
             (*H->ks_defs)[*H->keyspace] = ksdef;
         }
-        *S->column_family = scan_columnfamily(stmt->active_query_string);
+        char *cf = scan_columnfamily(stmt->active_query_string);
+        if (cf) {
+            *S->column_family = cf;
+            efree(cf);
+        }
 		H->client.execute_cql_query(*result, stmt->active_query_string, Compression::NONE);
 	} catch(InvalidRequestException &e) {
 		char *message = const_cast<char *>(e.why.c_str());
@@ -82,21 +88,16 @@ static int pdo_cassandra_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 static int pdo_cassandra_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
 		enum pdo_param_event event_type TSRMLS_DC)
 {
+    DEBUG_OUTPUT("param_hook");
 	pdo_cassandra_stmt *S = (pdo_cassandra_stmt*)stmt->driver_data;
 
     if (S && param->is_param) {
         switch (event_type) {
             case PDO_PARAM_EVT_ALLOC:
-                cout << "PDO_PARAM_EVT_ALLOC" << endl;
                 break;
             case PDO_PARAM_EVT_FREE:
-                cout << "PDO_PARAM_EVT_FREE" << endl;
                 break;
             case PDO_PARAM_EVT_EXEC_PRE:
-                cout << "PDO_PARAM_EVT_EXEC_PRE" << endl;
-                cout << "paramno: " << param->paramno << endl;
-                cout << "paramtype: " << param->param_type << endl;
-                cout << "parameter: " << param->parameter << endl;
                 switch (param->param_type) {
                     case PDO_PARAM_STR:
                         convert_to_string(param->parameter);
@@ -104,19 +105,13 @@ static int pdo_cassandra_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_para
                 }
                 break;
             case PDO_PARAM_EVT_EXEC_POST:
-                cout << "PDO_PARAM_EVT_EXEC_POST" << endl;
                 break;
             case PDO_PARAM_EVT_FETCH_PRE:
-                cout << "PDO_PARAM_EVT_FETCH_PRE" << endl;
                 break;
             case PDO_PARAM_EVT_FETCH_POST:
-                cout << "PDO_PARAM_EVT_FETCH_POST" << endl;
                 break;
             case PDO_PARAM_EVT_NORMALIZE:
-                cout << "PDO_PARAM_EVT_NORMALIZE" << endl;
                 break;
-            default:
-                cout << "event_type: " << event_type << endl;
         }
     }
 	return 1;
@@ -125,6 +120,7 @@ static int pdo_cassandra_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_para
 static int pdo_cassandra_stmt_fetch(pdo_stmt_t *stmt,
 	enum pdo_fetch_orientation ori, long offset TSRMLS_DC)
 {
+    DEBUG_OUTPUT("fetch");
 	pdo_cassandra_stmt *S = (pdo_cassandra_stmt*)stmt->driver_data;
 
 	if (++S->index >= S->result->rows.size()) {
@@ -139,15 +135,18 @@ static int pdo_cassandra_stmt_fetch(pdo_stmt_t *stmt,
 				S->ignore_column_count = false;
 			} else {
 				--S->index;
+                DEBUG_OUTPUT("end_fetch0");
 				return 0;
 			}
 		}
 	}
+    DEBUG_OUTPUT("end_fetch1");
 	return 1;
 }
 
 static int pdo_cassandra_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 {
+    DEBUG_OUTPUT("describe");
 	pdo_cassandra_stmt *S = (pdo_cassandra_stmt*)stmt->driver_data;
 
 	CqlRow row = S->result->rows[S->index + 1];
@@ -196,6 +195,7 @@ static int pdo_cassandra_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 
 static int pdo_cassandra_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len, int *caller_frees TSRMLS_DC)
 {
+    DEBUG_OUTPUT("get_col");
 	pdo_cassandra_stmt *S = (pdo_cassandra_stmt*)stmt->driver_data;
     pdo_cassandra_db_handle *H = S->H;
 
@@ -234,6 +234,7 @@ static int pdo_cassandra_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, u
                                 *ptr = const_cast<char *>(col.value.c_str());
                             }
                         } else {
+                            *ptr = const_cast<char *>(col.value.c_str());
                             // TODO: exception
                         }
                     }
@@ -249,6 +250,7 @@ static int pdo_cassandra_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, u
 
 static int pdo_cassandra_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_value TSRMLS_DC)
 {
+    DEBUG_OUTPUT("col_meta");
 	pdo_cassandra_stmt *S = (pdo_cassandra_stmt*)stmt->driver_data;
 
 	if (!stmt->executed || !S->result) {
@@ -294,13 +296,16 @@ static int pdo_cassandra_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *retur
 
 static int pdo_cassandra_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 {
+    DEBUG_OUTPUT("next_rowset");
 	pdo_cassandra_stmt *S = (pdo_cassandra_stmt*)stmt->driver_data;
 
 	if (S->index < S->result->rows.size()) {
 		stmt->column_count = S->result->rows[S->index + 1].columns.size();
 		S->ignore_column_count = true;
+        DEBUG_OUTPUT("next_rowset1");
 		return 1;
 	} else {
+        DEBUG_OUTPUT("next_rowset0");
 		return 0;
 	}
 }

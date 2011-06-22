@@ -25,6 +25,12 @@
 #include <protocol/TBinaryProtocol.h>
 #include <iostream>
 
+#ifdef DEBUG_CASSANDRA
+#define DEBUG_OUTPUT(s) printf("%s\n", s);
+#else
+#define DEBUG_OUTPUT(s)
+#endif
+
 using namespace apache::thrift;
 using namespace apache::thrift::protocol;
 using namespace apache::thrift::transport;
