@@ -23,8 +23,10 @@ echo $db->exec("CREATE KEYSPACE $keyspace WITH strategy_class = 'org.apache.cass
 echo $db->exec("USE $keyspace") . PHP_EOL;
 echo $db->exec("CREATE COLUMNFAMILY $columnFamily (KEY text PRIMARY KEY, col1 text)") . PHP_EOL;
 echo $db->exec("INSERT INTO $columnFamily (KEY, col1) VALUES ('a', 'text1')") . PHP_EOL;
-echo $db->exec("INSERT INTO $columnFamily (KEY, col1, col2) VALUES ('b', 'text1', 'text2')") . PHP_EOL;
+echo $db->exec("INSERT INTO $columnFamily (KEY, col1) VALUES ('b', 'text1')") . PHP_EOL;
+echo $db->exec("INSERT INTO $columnFamily (KEY, col1, col2) VALUES ('c', 'text1', 'text2')") . PHP_EOL;
 $stmt = $db->query("SELECT * FROM $columnFamily");
+echo $stmt->rowCount() . PHP_EOL;
 do {
     $data = $stmt->fetchAll();
     var_dump($data);
@@ -43,6 +45,8 @@ echo $db->exec("DROP KEYSPACE $keyspace") . PHP_EOL;
 0
 0
 0
+0
+3
 array(1) {
   [0]=>
   array(2) {
@@ -56,11 +60,20 @@ array(1) {
   [0]=>
   array(3) {
     ["KEY"]=>
-    string(1) "b"
+    string(1) "c"
     ["col1"]=>
     string(5) "text1"
     ["col2"]=>
     string(5) "text2"
+  }
+}
+array(1) {
+  [0]=>
+  array(2) {
+    ["KEY"]=>
+    string(1) "b"
+    ["col1"]=>
+    string(5) "text1"
   }
 }
 array(0) {
@@ -76,13 +89,11 @@ array(1) {
 }
 array(1) {
   [0]=>
-  array(3) {
+  array(2) {
     ["KEY"]=>
     string(1) "b"
     ["col1"]=>
     string(5) "text1"
-    ["col2"]=>
-    string(5) "text2"
   }
 }
 0

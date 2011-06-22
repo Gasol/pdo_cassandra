@@ -182,14 +182,14 @@ static int pdo_cassandra_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
                         name = estrdup(col.name.c_str());
                     }
                 } else {
-                    name = const_cast<char *>(col.name.c_str());
+					name = estrdup(col.name.c_str());
                     for (vector<ColumnDef>::iterator column_it = cfdef.column_metadata.begin(); column_it != cfdef.column_metadata.end(); column_it++) {
                         ColumnDef column_def = *column_it;
                         if (col.name == column_def.name) {
                             if (column_def.validation_class == "org.apache.cassandra.db.marshal.UTF8Type" ||
                                     column_def.validation_class == "org.apache.cassandra.db.marshal.AsciiType") {
                             } else if (column_def.validation_class == "org.apache.cassandra.db.marshal.LongType") {
-                                param_type = PDO_PARAM_INT;
+                                //param_type = PDO_PARAM_INT;
                             }
                         }
                     }
@@ -222,7 +222,6 @@ static int pdo_cassandra_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, u
 
 	Column col = row.columns[colno];
     struct pdo_column_data *co = &stmt->columns[colno];
-    int type = PDO_PARAM_TYPE(co->param_type);
 
     map<string, KsDef>::iterator ks_it = H->ks_defs->find(*H->keyspace);
     if (ks_it != H->ks_defs->end()) {
@@ -248,16 +247,17 @@ static int pdo_cassandra_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, u
                                 int64_t long_value = deserializeLong(col.value);
                                 char value[sizeof(int64_t) * 8 + 1];
                                 *ptr = ltoa(long_value, value, 10);
-                                *ptr = value;
                             } else {
                                 *ptr = const_cast<char *>(col.value.c_str());
                             }
-                        } else {
-                            *ptr = const_cast<char *>(col.value.c_str());
-                            // TODO: exception
+							break;
                         }
                     }
                 }
+				if (*ptr == NULL) {
+					*ptr = const_cast<char *>(col.value.c_str());
+				}
+				break;
             }
         }
     }

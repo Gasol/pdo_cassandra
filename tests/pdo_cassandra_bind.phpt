@@ -32,22 +32,29 @@ $stmt->execute();
 $stmt = $db->query("SELECT * FROM $columnFamily");
 do {
     $data = $stmt->fetchAll();
-    print_r($data);
-    //var_dump($data);
+    var_dump($data);
 } while ($stmt->nextRowset());
-var_dump($stmt->fetchAll());
 $db->exec("DROP KEYSPACE $keyspace") . PHP_EOL;
 
 ?>
 --EXPECT--
-array(1) {
+array(2) {
   [0]=>
-  array(2) {
+  array(3) {
+    ["KEY"]=>
+    string(1) "2"
+    ["col1"]=>
+    string(5) "text2"
+    ["col2"]=>
+    string(1) "2"
+  }
+  [1]=>
+  array(3) {
     ["KEY"]=>
     string(1) "1"
     ["col1"]=>
     string(5) "text1"
+    ["col2"]=>
+    string(1) "1"
   }
-}
-array(0) {
 }
