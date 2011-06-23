@@ -240,6 +240,7 @@ static int pdo_cassandra_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, u
                     } else {
                         *ptr = estrdup(col.value.c_str());
                     }
+					break;
                 } else {
                     for (vector<ColumnDef>::iterator column_it = cfdef.column_metadata.begin(); column_it != cfdef.column_metadata.end(); column_it++) {
                         ColumnDef column_def = *column_it;
