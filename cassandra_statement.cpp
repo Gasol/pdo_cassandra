@@ -171,10 +171,10 @@ static int pdo_cassandra_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
             CfDef cfdef = *cf_it;
             if (cfdef.name == *S->column_family) {
                 if (col.name == "KEY") {
-                    if (cfdef.key_validation_class == "org.apache.cassandra.db.marshal.UTF8Type" ||
-                            cfdef.key_validation_class == "org.apache.cassandra.db.marshal.AsciiType") {
+                    if (cfdef.comparator_type == "org.apache.cassandra.db.marshal.UTF8Type" ||
+                            cfdef.comparator_type == "org.apache.cassandra.db.marshal.AsciiType") {
                         name = estrdup(col.name.c_str());
-                    } else if (cfdef.key_validation_class == "org.apache.cassandra.db.marshal.LongType") {
+                    } else if (cfdef.comparator_type == "org.apache.cassandra.db.marshal.LongType") {
                         int64_t long_value = deserializeLong(col.name);
                         char value[sizeof(int64_t) * 8 + 1];
                         name = ltoa(long_value, value, 10);
