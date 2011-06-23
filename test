@@ -1,0 +1,9 @@
+#!/bin/sh
+
+PHP_TEST_EXECUTABLE="/usr/bin/php"
+PHPCONFIG="/usr/bin/php-config"
+PHP="/usr/bin/php"
+MODULE_DIR="./modules/"
+EXTENSION_DIR="`$PHPCONFIG --extension-dir`"
+
+TEST_PHP_EXECUTABLE=$PHP $PHP run-tests.php -n -d extension_dir=$MODULE_DIR -d extension=$EXTENSION_DIR/pdo.so -d extension=pdo_cassandra.so
