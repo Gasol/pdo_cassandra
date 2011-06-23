@@ -230,9 +230,13 @@ static int pdo_cassandra_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, u
             CfDef cfdef = *cf_it;
             if (cfdef.name == *S->column_family) {
                 if (col.name == "KEY") {
-                    if (cfdef.comparator_type == "org.apache.cassandra.db.marshal.UTF8Type" ||
-                            cfdef.comparator_type == "org.apache.cassandra.db.marshal.AsciiType") {
+                    if (cfdef.key_validation_class == "org.apache.cassandra.db.marshal.UTF8Type" ||
+                            cfdef.key_validation_class == "org.apache.cassandra.db.marshal.AsciiType") {
                         *ptr = const_cast<char *>(col.value.c_str());
+                    } else if (cfdef.key_validation_class == "org.apache.cassandra.db.marshal.LongType") {
+						int64_t long_value = deserializeLong(col.value);
+						char value[sizeof(int64_t) * 8 + 1];
+						*ptr = ltoa(long_value, value, 10);
                     } else {
                         *ptr = const_cast<char *>(col.value.c_str());
                     }
