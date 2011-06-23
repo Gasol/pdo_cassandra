@@ -232,13 +232,13 @@ static int pdo_cassandra_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, u
                 if (col.name == "KEY") {
                     if (cfdef.key_validation_class == "org.apache.cassandra.db.marshal.UTF8Type" ||
                             cfdef.key_validation_class == "org.apache.cassandra.db.marshal.AsciiType") {
-                        *ptr = const_cast<char *>(col.value.c_str());
+                        *ptr = estrdup(col.value.c_str());
                     } else if (cfdef.key_validation_class == "org.apache.cassandra.db.marshal.LongType") {
 						int64_t long_value = deserializeLong(col.value);
 						char value[sizeof(int64_t) * 8 + 1];
 						*ptr = ltoa(long_value, value, 10);
                     } else {
-                        *ptr = const_cast<char *>(col.value.c_str());
+                        *ptr = estrdup(col.value.c_str());
                     }
                 } else {
                     for (vector<ColumnDef>::iterator column_it = cfdef.column_metadata.begin(); column_it != cfdef.column_metadata.end(); column_it++) {
@@ -246,20 +246,20 @@ static int pdo_cassandra_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, u
                         if (col.name == column_def.name) {
                             if (column_def.validation_class == "org.apache.cassandra.db.marshal.UTF8Type" ||
                                     column_def.validation_class == "org.apache.cassandra.db.marshal.AsciiType") {
-                                *ptr = const_cast<char *>(col.value.c_str());
+                                *ptr = estrdup(col.value.c_str());
                             } else if (column_def.validation_class == "org.apache.cassandra.db.marshal.LongType") {
                                 int64_t long_value = deserializeLong(col.value);
                                 char value[sizeof(int64_t) * 8 + 1];
                                 *ptr = ltoa(long_value, value, 10);
                             } else {
-                                *ptr = const_cast<char *>(col.value.c_str());
+                                *ptr = estrdup(col.value.c_str());
                             }
 							break;
                         }
                     }
                 }
 				if (*ptr == NULL) {
-					*ptr = const_cast<char *>(col.value.c_str());
+					*ptr = estrdup(col.value.c_str());
 				}
 				break;
             }
