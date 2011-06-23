@@ -6,4 +6,4 @@ PHP="/usr/bin/php"
 MODULE_DIR="./modules/"
 EXTENSION_DIR="`$PHPCONFIG --extension-dir`"
 
-TEST_PHP_EXECUTABLE=$PHP $PHP run-tests.php -n -d extension_dir=$MODULE_DIR -d extension=$EXTENSION_DIR/pdo.so -d extension=pdo_cassandra.so
+TEST_PHP_EXECUTABLE=$PHP $PHP run-tests.php -n -d extension_dir=$MODULE_DIR -d extension=$EXTENSION_DIR/pdo.so -d extension=pdo_cassandra.so $1 $2
