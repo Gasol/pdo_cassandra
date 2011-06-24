@@ -68,12 +68,14 @@ static int pdo_cassandra_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	switch (result->type) {
 		case CqlResultType::ROWS:
 			S->result = result;
-			S->index = -1;
-			S->ignore_column_count = false;
+            S->index = -1;
+            S->ignore_column_count = false;
 			stmt->row_count = result->rows.size();
-			if (result->rows.size() > 0) {
-				stmt->column_count = result->rows[0].columns.size();
-			}
+            /*
+            if (stmt->row_count > 0) {
+                stmt->column_count = S->result->rows[0].size();
+            }
+            */
 			break;
 		case CqlResultType::INT:
 			stmt->row_count = result->num;
@@ -135,17 +137,7 @@ static int pdo_cassandra_stmt_fetch(pdo_stmt_t *stmt,
 	}
 
 	CqlRow row = S->result->rows[S->index];
-	if (S->index > 0) {
-		CqlRow previous_row = S->result->rows[S->index - 1];
-		if (row.columns.size() != previous_row.columns.size()) {
-			if (S->ignore_column_count) {
-				S->ignore_column_count = false;
-			} else {
-				--S->index;
-				return 0;
-			}
-		}
-	}
+
     /* un-describe */
     if (stmt->columns) {
         int i;
@@ -158,6 +150,9 @@ static int pdo_cassandra_stmt_fetch(pdo_stmt_t *stmt,
         stmt->columns = NULL;
         stmt->column_count = 0;
     }
+
+    stmt->column_count = row.columns.size();
+
 	return 1;
 }
 
@@ -166,7 +161,7 @@ static int pdo_cassandra_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
     DEBUG_OUTPUT("describe");
 	pdo_cassandra_stmt *S = (pdo_cassandra_stmt*)stmt->driver_data;
 
-	CqlRow row = S->result->rows[S->index + 1];
+	CqlRow row = S->result->rows[S->index];
 	if (colno >= row.columns.size()) {
 		return 0;
 	}
@@ -359,15 +354,7 @@ static int pdo_cassandra_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *retur
 static int pdo_cassandra_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 {
     DEBUG_OUTPUT("next_rowset");
-	pdo_cassandra_stmt *S = (pdo_cassandra_stmt*)stmt->driver_data;
-
-	if (S->index < S->result->rows.size()) {
-		stmt->column_count = S->result->rows[S->index + 1].columns.size();
-		S->ignore_column_count = true;
-		return 1;
-	} else {
-		return 0;
-	}
+    return 0;
 }
 
 static int pdo_cassandra_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
@@ -385,6 +372,6 @@ struct pdo_stmt_methods cassandra_stmt_methods = {
 	NULL, /* set_attr */
 	NULL, /* get_attr */
 	pdo_cassandra_stmt_col_meta,
-	pdo_cassandra_stmt_next_rowset,
+	NULL, /* pdo_cassandra_stmt_next_rowset, */
 	NULL /* pdo_cassandra_stmt_cursor_closer */
 };
