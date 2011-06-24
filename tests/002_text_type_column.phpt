@@ -45,16 +45,18 @@ $stmt = $db->query("SELECT column10..column15 FROM $columnFamily WHERE KEY = row
 echo 'columnCount: ' . $stmt->columnCount() . PHP_EOL;
 echo 'rowCount: ' . $stmt->rowCount() . PHP_EOL;
 var_dump($stmt->fetch());
+
 $stmt = $db->query("SELECT FIRST 2 column10..column15 FROM $columnFamily WHERE KEY = row_a");
 echo 'columnCount: ' . $stmt->columnCount() . PHP_EOL;
 echo 'rowCount: ' . $stmt->rowCount() . PHP_EOL;
 var_dump($stmt->fetch());
+
 $stmt = $db->query("SELECT FIRST 5 REVERSED column50..column30 FROM $columnFamily WHERE KEY = 'row_b'");
 echo 'columnCount: ' . $stmt->columnCount() . PHP_EOL;
 echo 'rowCount: ' . $stmt->rowCount() . PHP_EOL;
 var_dump($stmt->fetch());
-$db->exec("DROP KEYSPACE $keyspace") . PHP_EOL;
 
+$db->exec("DROP KEYSPACE $keyspace") . PHP_EOL;
 ?>
 --EXPECT--
 array(2) {
