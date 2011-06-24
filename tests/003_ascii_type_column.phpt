@@ -37,22 +37,20 @@ for ($i = 30; $i < 40; $i++) {
 }
 $db->exec("INSERT INTO $columnFamily (KEY, " . implode(', ', $columns) . ") VALUES ('row_b', " . implode(', ', $values) . ")");
 $stmt = $db->query("SELECT * FROM $columnFamily");
-do {
-    while ($row = $stmt->fetchAll()) {
-        echo 'columnCount: ' . $stmt->columnCount() . PHP_EOL;
-        echo 'rowCount: ' . $stmt->rowCount() . PHP_EOL;
-        var_dump($row);
-    }
-} while ($stmt->nextRowset());
+var_dump($stmt->fetchAll());
+echo 'columnCount: ' . $stmt->columnCount() . PHP_EOL;
+echo 'rowCount: ' . $stmt->rowCount() . PHP_EOL;
 
 $stmt = $db->query("SELECT column10..column15 FROM $columnFamily WHERE KEY = row_a");
 echo 'columnCount: ' . $stmt->columnCount() . PHP_EOL;
 echo 'rowCount: ' . $stmt->rowCount() . PHP_EOL;
 var_dump($stmt->fetch());
+
 $stmt = $db->query("SELECT FIRST 2 column10..column15 FROM $columnFamily WHERE KEY = row_a");
 echo 'columnCount: ' . $stmt->columnCount() . PHP_EOL;
 echo 'rowCount: ' . $stmt->rowCount() . PHP_EOL;
 var_dump($stmt->fetch());
+
 $stmt = $db->query("SELECT FIRST 5 REVERSED column50..column30 FROM $columnFamily WHERE KEY = 'row_b'");
 echo 'columnCount: ' . $stmt->columnCount() . PHP_EOL;
 echo 'rowCount: ' . $stmt->rowCount() . PHP_EOL;
@@ -61,9 +59,7 @@ $db->exec("DROP KEYSPACE $keyspace") . PHP_EOL;
 
 ?>
 --EXPECT--
-columnCount: 11
-rowCount: 2
-array(1) {
+array(2) {
   [0]=>
   array(11) {
     ["KEY"]=>
@@ -89,11 +85,7 @@ array(1) {
     ["column39"]=>
     string(7) "value39"
   }
-}
-columnCount: 21
-rowCount: 2
-array(1) {
-  [0]=>
+  [1]=>
   array(21) {
     ["KEY"]=>
     string(5) "row_a"
@@ -139,7 +131,9 @@ array(1) {
     string(6) "value9"
   }
 }
-columnCount: 6
+columnCount: 21
+rowCount: 2
+columnCount: 0
 rowCount: 1
 array(6) {
   ["column10"]=>
@@ -155,7 +149,7 @@ array(6) {
   ["column15"]=>
   string(7) "value15"
 }
-columnCount: 2
+columnCount: 0
 rowCount: 1
 array(2) {
   ["column10"]=>
@@ -163,7 +157,7 @@ array(2) {
   ["column11"]=>
   string(7) "value11"
 }
-columnCount: 5
+columnCount: 0
 rowCount: 1
 array(5) {
   ["column39"]=>
