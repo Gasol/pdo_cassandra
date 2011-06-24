@@ -177,6 +177,13 @@ static int pdo_cassandra_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 							cfdef.comparator_type == "org.apache.cassandra.db.marshal.AsciiType") {
 						name = estrdup(col.name.c_str());
 					} else if (cfdef.comparator_type == "org.apache.cassandra.db.marshal.LongType") {
+						int64_t lval = deserializeLong(col.name);
+						zval *tmp;
+						ALLOC_INIT_ZVAL(tmp);
+						ZVAL_LONG(tmp, lval);
+						convert_to_string(tmp);
+						name = estrdup(Z_STRVAL_P(tmp));
+						zval_ptr_dtor(&tmp);
 						//param_type = PDO_PARAM_INT;
 					}
                 }
