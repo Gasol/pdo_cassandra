@@ -26,6 +26,7 @@ END_EXTERN_C()
 #include "php_pdo_cassandra.h"
 #include "php_pdo_cassandra_int.h"
 #include "zend_exceptions.h"
+#include "uuid/uuid.h"
 
 static int pdo_cassandra_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 {
@@ -196,7 +197,12 @@ static int pdo_cassandra_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 						convert_to_string(tmp);
 						name = estrdup(Z_STRVAL_P(tmp));
 						zval_ptr_dtor(&tmp);
-					}
+					} else if (cfdef.comparator_type == "org.apache.cassandra.db.marshal.UUIDType") {
+                        uuid_t *uu = (uuid_t *) col.name.c_str();
+                        char *out = (char *)emalloc(sizeof(char) * 37);
+                        uuid_unparse(*uu, out);
+                        name = out;
+                    }
                     for (vector<ColumnDef>::iterator column_it = cfdef.column_metadata.begin(); column_it != cfdef.column_metadata.end(); column_it++) {
                         ColumnDef column_def = *column_it;
                         if (col.name == column_def.name) {
