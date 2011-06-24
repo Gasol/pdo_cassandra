@@ -146,6 +146,18 @@ static int pdo_cassandra_stmt_fetch(pdo_stmt_t *stmt,
 			}
 		}
 	}
+    /* un-describe */
+    if (stmt->columns) {
+        int i;
+        struct pdo_column_data *cols = stmt->columns;
+
+        for (i = 0; i < stmt->column_count; i++) {
+            efree(cols[i].name);
+        }
+        efree(stmt->columns);
+        stmt->columns = NULL;
+        stmt->column_count = 0;
+    }
 	return 1;
 }
 
