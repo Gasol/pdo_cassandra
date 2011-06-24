@@ -219,7 +219,7 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 		goto cleanup;
     }
 
-	dbh->alloc_own_columns = 1;
+	dbh->alloc_own_columns = 0;
 	dbh->max_escaped_char_length = 2;
     dbh->default_fetch_type = PDO_FETCH_ASSOC;
 
