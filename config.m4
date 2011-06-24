@@ -86,6 +86,12 @@ using namespace org::apache::cassandra;],
   [AC_MSG_ERROR([wrong cassandra lib version or lib not found])])
   CPPFLAGS=$SAVED_CPPFLAGS
 
+  PHP_ADD_LIBRARY(uuid, , PDO_CASSANDRA_SHARED_LIBADD)
+  PHP_CHECK_LIBRARY(uuid, uuid_unparse,[
+      PHP_ADD_LIBRARY(uuid, , PDO_CASSANDRA_SHARED_LIBADD)
+  ],[
+    AC_MSG_ERROR([wrong uuid lib version or lib not found])
+  ])
   dnl PHP_ADD_LIBRARY(stdc++, , PDO_CASSANDRA_SHARED_LIBADD)
   AC_DEFINE(HAVE_PDO_CASSANDRALIB,1,[ ])
   PHP_SUBST(PDO_CASSANDRA_SHARED_LIBADD)
