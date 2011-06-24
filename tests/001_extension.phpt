@@ -1,5 +1,5 @@
 --TEST--
-Cassandra
+Cassandra extension
 --SKIPIF--
 <?php
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'cassandra_pdo_test.inc');
