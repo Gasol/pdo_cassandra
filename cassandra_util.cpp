@@ -41,3 +41,65 @@ int64_t deserializeLong(std::string &str)
     ret |= (tmp << 56);
     return ret;
 }
+
+char* stringToHex(char *str)
+{
+	int len = strlen(str);
+	char *buf = (char*) malloc(len * 2 + 1);
+	char *ret = buf;
+	int i;
+	char msb = 0, lsb = 0;
+	for (; *str != 0; ++str) {
+		msb = *str >> 4 & 15;
+		lsb = *str & 15;
+
+		sprintf(buf, "%x", msb);
+		sprintf(buf + 1, "%x", lsb);
+		buf += 2;
+	}
+	return ret;
+}
+
+char htoi(char ch)
+{
+	if (ch >= '0' && ch <= '9') {
+		return ch - 0x30;
+	} else if (ch >= 'a' && ch <= 'f') {
+		return ch - 0x61 + 10;
+	} else if (ch >= 'A' && ch <= 'F') {
+		return ch - 0x41 + 10;
+	}
+
+	return -1;
+}
+
+char* hexToString(char *hex)
+{
+	size_t len = strlen(hex);
+	if (len & 1) return NULL;
+
+	char *buf = (char*) malloc(len / 2 + 1);
+	char *ret = buf;
+	int ch = 0, tmp = 0;
+	int i;
+	for (i = 0; i < len / 2; i++) {
+		char msb = hex[i*2];
+		char lsb = hex[i*2+1];
+		tmp = htoi(msb);
+		if (tmp == -1) {
+			goto clean;
+		}
+		ch = tmp << 4;
+		tmp = htoi(lsb);
+		if (tmp == -1) {
+			goto clean;
+		}
+		ch |= tmp;
+		buf[i] = ch;
+	}
+
+	return ret;
+clean:
+	free(buf);
+	return NULL;
+}
