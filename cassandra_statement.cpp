@@ -202,6 +202,8 @@ static int pdo_cassandra_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
                         char *out = (char *)emalloc(sizeof(char) * 37);
                         uuid_unparse(*uu, out);
                         name = out;
+                    } else if (cfdef.comparator_type == "org.apache.cassandra.db.marshal.BytesType") {
+                        name = hexToString(const_cast<char *>(col.name.c_str()));
                     }
                     for (vector<ColumnDef>::iterator column_it = cfdef.column_metadata.begin(); column_it != cfdef.column_metadata.end(); column_it++) {
                         ColumnDef column_def = *column_it;
