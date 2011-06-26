@@ -60,5 +60,7 @@ char* scan_columnfamily(char *cql);
 char* ltoa(long N, char *str, int base);
 END_EXTERN_C()
 int64_t deserializeLong(string &str);
+char* hexToString(char *hex);
+char* stringToHex(char *str);
 
 #endif // PHP_PDO_CASSANDRA_INT_H
