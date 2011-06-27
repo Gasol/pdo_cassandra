@@ -109,6 +109,13 @@ static int pdo_cassandra_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval
 
 static int pdo_cassandra_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value TSRMLS_DC)
 {
+	pdo_cassandra_db_handle *H = (pdo_cassandra_db_handle *)dbh->driver_data;
+    switch (attr) {
+        case PDO_ATTR_SERVER_VERSION:
+            string ver;
+            H->client.describe_version(ver);
+            RETVAL_STRING(ver.c_str(), 1);
+    }
 	return 1;
 }
 
@@ -140,7 +147,7 @@ static struct pdo_dbh_methods cassandra_methods = {
 	NULL, /* pdo_cassandra_set_attribute, */
 	NULL, /* last_insert_id */
 	NULL, /* pdo_cassandra_fetch_error_func, */
-	NULL, /* pdo_cassandra_get_attribute, */
+	pdo_cassandra_get_attribute,
 	NULL,	/* check_liveness */
 	get_driver_methods,
 	NULL /* pdo_cassandra_request_shutdown */
