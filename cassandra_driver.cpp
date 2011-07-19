@@ -183,7 +183,8 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 	}
 
     if (host == NULL) {
-        zend_throw_exception(php_pdo_get_exception(), "invalid data source name", 0 TSRMLS_CC);
+        char *message = const_cast<char *>("invalid data source name");
+        zend_throw_exception(php_pdo_get_exception(), message, 0 TSRMLS_CC);
         goto cleanup;
     }
 
