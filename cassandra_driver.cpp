@@ -168,7 +168,8 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 		{"port", "9160", 0},
 	};
 
-	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 3);
+	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars,
+            sizeof(vars) / sizeof(pdo_data_src_parser));
 
 	H = (pdo_cassandra_db_handle*) pecalloc(1, sizeof(pdo_cassandra_db_handle), dbh->is_persistent);
     H->keyspace = new string();
