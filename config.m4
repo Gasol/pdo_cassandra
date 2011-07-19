@@ -51,7 +51,7 @@ if test "$PHP_PDO_CASSANDRA" != "no"; then
     AC_MSG_CHECKING([for pdo_cassandra files in default path])
     for i in $SEARCH_PATH ; do
       if test -r $i/$SEARCH_FOR; then
-        AC_MSG_ERROR([good])PDO_CASSANDRA_DIR=$i
+        PDO_CASSANDRA_DIR=$i
         AC_MSG_RESULT(found in $i)
       fi
     done
@@ -96,6 +96,12 @@ using namespace org::apache::cassandra;],
   AC_DEFINE(HAVE_PDO_CASSANDRALIB,1,[ ])
   PHP_SUBST(PDO_CASSANDRA_SHARED_LIBADD)
 
-  PHP_NEW_EXTENSION(pdo_cassandra, pdo_cassandra.cpp cassandra_cql_parser.c cassandra_util.cpp cassandra_driver.cpp cassandra_statement.cpp ltoa.c, $ext_shared,, -I$pdo_cv_inc_path)
+  pdo_cassandra_sources="pdo_cassandra.cpp \
+                         cassandra_cql_parser.c \
+                         cassandra_util.cpp \
+                         cassandra_driver.cpp \
+                         cassandra_statement.cpp \
+                         ltoa.c"
+  PHP_NEW_EXTENSION(pdo_cassandra, $pdo_cassandra_sources, $ext_shared,, -I$pdo_cv_inc_path)
   PHP_ADD_EXTENSION_DEP(pdo_cassandra, pdo)
 fi
