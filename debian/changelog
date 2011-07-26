@@ -1,5 +1,5 @@
 php5-cassandra (0.1-1) unstable; urgency=low
 
-  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+  * Initial release
 
  -- Gasol Wu <gasol.wu@gmail.com>  Tue, 26 Jul 2011 08:12:58 +0000
