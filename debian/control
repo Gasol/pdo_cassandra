@@ -1,16 +1,16 @@
 Source: php5-cassandra
 Priority: extra
 Maintainer: Gasol Wu <gasol.wu@gmail.com>
-Build-Depends: debhelper (>= 7.0.50~)
+Build-Depends: debhelper (>= 7.0.50~), libthrift-dev, uuid-dev
 Standards-Version: 3.8.4
-Section: libs
-Homepage: <insert the upstream URL, if relevant>
-#Vcs-Git: git://git.debian.org/collab-maint/php5-cassandra.git
-#Vcs-Browser: http://git.debian.org/?p=collab-maint/php5-cassandra.git;a=summary
+Section: php
+Homepage: https://github.com/Gasol/pdo_cassandra
+Vcs-Git: git://github.com/Gasol/pdo_cassandra.git
+Vcs-Browser: https://github.com/Gasol/pdo_cassandra
 
-Package: php5-cassandraBROKEN
-Section: libs
+Package: php5-cassandra
+Section: php
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Description: Cassandra Driver for PDO
+ This extension provides a CQL interface for PDO drivers.

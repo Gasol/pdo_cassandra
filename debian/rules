@@ -9,5 +9,13 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+override_dh_auto_test:
+
+override_dh_auto_configure:
+	./configure
+
+override_dh_auto_install:
+	$(MAKE) install INSTALL_ROOT=$(CURDIR)/debian/php5-cassandra
+
 %:
-	dh $@ 
+	dh $@
