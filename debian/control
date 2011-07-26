@@ -11,6 +11,6 @@ Vcs-Browser: https://github.com/Gasol/pdo_cassandra
 Package: php5-cassandra
 Section: php
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, php5-common
 Description: Cassandra Driver for PDO
  This extension provides a CQL interface for PDO drivers.
