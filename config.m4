@@ -56,13 +56,17 @@ if test "$PHP_PDO_CASSANDRA" != "no"; then
     AC_LANG(C++)
     SAVED_CPPFLAGS=$CPPFLAGS
     CPPFLAGS="$CPPFLAGS $THRIFT_INCS $THRIFT_LIBS"
-    AC_LINK_IFELSE(
-    [AC_LANG_PROGRAM([#include<Thrift.h>
-      using namespace apache::thrift;],
-      [GlobalOutput.printf("hello")])],
-    [PHP_EVAL_LIBLINE($THRIFT_LIBS, PDO_CASSANDRA_SHARED_LIBADD)
-     PHP_EVAL_INCLINE($THRIFT_INCS)],
-    [AC_MSG_ERROR([wrong thrift lib version or lib not found])])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([
+      #include<Thrift.h>
+      using namespace apache::thrift;
+    ], [
+      GlobalOutput.printf("hello")])
+    ], [
+      PHP_EVAL_LIBLINE($THRIFT_LIBS, PDO_CASSANDRA_SHARED_LIBADD)
+      PHP_EVAL_INCLINE($THRIFT_INCS)
+    ], [
+      AC_MSG_ERROR([wrong thrift lib version or lib not found])
+    ])
     CPPFLAGS=$SAVED_CPPFLAGS
   fi
 
@@ -151,16 +155,20 @@ if test "$PHP_PDO_CASSANDRA" != "no"; then
     AC_LANG(C++)
     SAVED_CPPFLAGS=$CPPFLAGS
     CPPFLAGS="$CPPFLAGS $THRIFT_INCS $THRIFT_LIBS $CASSANDRA_INCS $CASSANDRA_LIBS"
-    AC_LINK_IFELSE(
-    [AC_LANG_PROGRAM([#include "cassandra_constants.h"
-                      #include <iostream>
-                      using namespace std;
-                      using namespace org::apache::cassandra;],
-                      [[cassandraConstants constant;]
-                      [cout << constant.VERSION << endl]])],
-    [PHP_EVAL_LIBLINE($CASSANDRA_LIBS, PDO_CASSANDRA_SHARED_LIBADD)
-     PHP_EVAL_INCLINE($CASSANDRA_INCS)],
-    [AC_MSG_ERROR([wrong cassandra lib version or lib not found])])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([
+      #include "cassandra_constants.h"
+      #include <iostream>
+      using namespace std;
+      using namespace org::apache::cassandra;
+    ], [
+      [cassandraConstants constant;]
+      [cout << constant.VERSION << endl]
+    ])], [
+      PHP_EVAL_LIBLINE($CASSANDRA_LIBS, PDO_CASSANDRA_SHARED_LIBADD)
+      PHP_EVAL_INCLINE($CASSANDRA_INCS)
+    ], [
+      AC_MSG_ERROR([wrong cassandra lib version or lib not found])
+    ])
     CPPFLAGS=$SAVED_CPPFLAGS
   fi
 
