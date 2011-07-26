@@ -164,7 +164,6 @@ if test "$PHP_PDO_CASSANDRA" != "no"; then
     CPPFLAGS=$SAVED_CPPFLAGS
   fi
 
-  PHP_ADD_LIBRARY(uuid, , PDO_CASSANDRA_SHARED_LIBADD)
   PHP_CHECK_LIBRARY(uuid, uuid_unparse,[
       PHP_ADD_LIBRARY(uuid, , PDO_CASSANDRA_SHARED_LIBADD)
   ],[
