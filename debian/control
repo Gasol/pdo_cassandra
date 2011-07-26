@@ -1,7 +1,7 @@
 Source: php5-cassandra
 Priority: extra
 Maintainer: Gasol Wu <gasol.wu@gmail.com>
-Build-Depends: debhelper (>= 7.0.50~), libthrift-dev, uuid-dev
+Build-Depends: debhelper (>= 7.0.50~), libthrift-dev, uuid-dev, php5-dev
 Standards-Version: 3.8.4
 Section: php
 Homepage: https://github.com/Gasol/pdo_cassandra
