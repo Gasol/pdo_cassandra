@@ -8,13 +8,6 @@ Homepage: <insert the upstream URL, if relevant>
 #Vcs-Git: git://git.debian.org/collab-maint/php5-cassandra.git
 #Vcs-Browser: http://git.debian.org/?p=collab-maint/php5-cassandra.git;a=summary
 
-Package: php5-cassandra-dev
-Section: libdevel
-Architecture: any
-Depends: php5-cassandraBROKEN (= ${binary:Version})
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
-
 Package: php5-cassandraBROKEN
 Section: libs
 Architecture: any
