@@ -102,8 +102,12 @@ if test "$PHP_PDO_CASSANDRA" != "no"; then
     if test "$PHP_PDO_CASSANDRA" = "yes" && test -x "$PKG_CONFIG" && $PKG_CONFIG --exists cassandra; then
       if $PKG_CONFIG --atleast-version 0.8 cassandra; then
         found_cassandra=yes
+        AC_MSG_CHECKING([for Cassandra library])
         CASSANDRA_LIBS=`$PKG_CONFIG --libs cassandra`
+        AC_MSG_RESULT([$CASSANDRA_LIBS])
+        AC_MSG_CHECKING([for Cassandra includes])
         CASSANDRA_INCS=`$PKG_CONFIG --cflags-only-I cassandra`
+        AC_MSG_RESULT([$CASSANDRA_INCS])
       else
         AC_MSG_ERROR([cassandra version 0.8 or greater required.])
       fi
@@ -114,42 +118,51 @@ if test "$PHP_PDO_CASSANDRA" != "no"; then
       for i in /usr/local/include /usr/include /usr/local/include/cassandra /usr/include/cassandra; do
         if test -r $i/Cassandra.h; then
           CASSANDRA_INCS="-I$i"
-          AC_MSG_RESULT(found in $i)
+          AC_MSG_RESULT($i)
         fi
       done
-
       if test -z "$CASSANDRA_INCS"; then
-        AC_MSG_ERROR([Could not find Cassandra.h in default path])
+        AC_MSG_RESULT([no, use bundle])
       fi
 
-      AC_MSG_CHECKING([for Cassandra library location])
+      AC_MSG_CHECKING([for Cassandra library in default path])
       for i in /usr/local/lib /usr/lib; do
         if test -f $i/libcassandra.a || test -f $i/libcassandra.$SHLIB_SUFFIX_NAME; then
-          AC_MSG_RESULT(found in $i)
+          AC_MSG_RESULT($i)
           CASSANDRA_LIBS="-lcassandra"
         fi
       done
-
       if test -z "$CASSANDRA_INCS"; then
-        AC_MSG_ERROR([Could not find libcassandra.(a|$SHLIB_SUFFIX_NAME) in default path])
+        AC_MSG_RESULT([no, use bundle])
+      fi
+
+      if test -n "$CASSANDRA_INCS" && test -n "$CASSANDRA_LIBS"; then
+        found_cassandra=yes
       fi
     fi
   fi
 
-  AC_LANG(C++)
-  SAVED_CPPFLAGS=$CPPFLAGS
-  CPPFLAGS="$CPPFLAGS $THRIFT_INCS $THRIFT_LIBS $CASSANDRA_INCS $CASSANDRA_LIBS"
-  AC_LINK_IFELSE(
-  [AC_LANG_PROGRAM([#include "cassandra_constants.h"
-                    #include <iostream>
-                    using namespace std;
-                    using namespace org::apache::cassandra;],
-                    [[cassandraConstants constant;]
-                    [cout << constant.VERSION << endl]])],
-  [PHP_EVAL_LIBLINE($CASSANDRA_LIBS, PDO_CASSANDRA_SHARED_LIBADD)
-   PHP_EVAL_INCLINE($CASSANDRA_INCS)],
-  [AC_MSG_ERROR([wrong cassandra lib version or lib not found])])
-  CPPFLAGS=$SAVED_CPPFLAGS
+  if test "$found_cassandra" = "no"; then
+    cassandra_sources="libcassandra/Cassandra.cpp \
+                       libcassandra/cassandra_constants.cpp \
+                       libcassandra/cassandra_types.cpp"
+    PHP_ADD_INCLUDE(libcassandra)
+  else
+    AC_LANG(C++)
+    SAVED_CPPFLAGS=$CPPFLAGS
+    CPPFLAGS="$CPPFLAGS $THRIFT_INCS $THRIFT_LIBS $CASSANDRA_INCS $CASSANDRA_LIBS"
+    AC_LINK_IFELSE(
+    [AC_LANG_PROGRAM([#include "cassandra_constants.h"
+                      #include <iostream>
+                      using namespace std;
+                      using namespace org::apache::cassandra;],
+                      [[cassandraConstants constant;]
+                      [cout << constant.VERSION << endl]])],
+    [PHP_EVAL_LIBLINE($CASSANDRA_LIBS, PDO_CASSANDRA_SHARED_LIBADD)
+     PHP_EVAL_INCLINE($CASSANDRA_INCS)],
+    [AC_MSG_ERROR([wrong cassandra lib version or lib not found])])
+    CPPFLAGS=$SAVED_CPPFLAGS
+  fi
 
   PHP_ADD_LIBRARY(uuid, , PDO_CASSANDRA_SHARED_LIBADD)
   PHP_CHECK_LIBRARY(uuid, uuid_unparse,[
@@ -166,7 +179,8 @@ if test "$PHP_PDO_CASSANDRA" != "no"; then
                          cassandra_util.cpp \
                          cassandra_driver.cpp \
                          cassandra_statement.cpp \
-                         ltoa.c"
+                         ltoa.c \
+                         $cassandra_sources"
   PHP_NEW_EXTENSION(pdo_cassandra, $pdo_cassandra_sources, $ext_shared,, -I$pdo_cv_inc_path)
   PHP_ADD_EXTENSION_DEP(pdo_cassandra, pdo)
 fi
