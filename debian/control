@@ -1,0 +1,23 @@
+Source: php5-cassandra
+Priority: extra
+Maintainer: Gasol Wu <gasol.wu@gmail.com>
+Build-Depends: debhelper (>= 7.0.50~)
+Standards-Version: 3.8.4
+Section: libs
+Homepage: <insert the upstream URL, if relevant>
+#Vcs-Git: git://git.debian.org/collab-maint/php5-cassandra.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/php5-cassandra.git;a=summary
+
+Package: php5-cassandra-dev
+Section: libdevel
+Architecture: any
+Depends: php5-cassandraBROKEN (= ${binary:Version})
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: php5-cassandraBROKEN
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
