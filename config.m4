@@ -18,7 +18,7 @@ if test "$PHP_PDO_CASSANDRA" != "no"; then
     AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
   fi
 
-  if test "$PHP_THRIFT" == "no"; then
+  if test "$PHP_THRIFT" = "no"; then
     AC_MSG_ERROR([thrift enable needed!])
   else
     found_thrift=no
