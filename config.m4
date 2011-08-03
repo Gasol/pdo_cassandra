@@ -8,6 +8,9 @@ PHP_ARG_WITH(pdo-cassandra, for pdo_cassandra support,
 PHP_ARG_WITH(thrift, for thrift support,
 [  --with-thrift           Include thrift support], yes, no)
 
+PHP_ARG_WITH(uuid, for uuid support,
+[  --with-uuid             Include uuid support], yes, no)
+
 if test "$PHP_PDO_CASSANDRA" != "no"; then
   PHP_REQUIRE_CXX()
 
@@ -172,12 +175,53 @@ if test "$PHP_PDO_CASSANDRA" != "no"; then
     CPPFLAGS=$SAVED_CPPFLAGS
   fi
 
-  PHP_CHECK_LIBRARY(uuid, uuid_unparse,[
-      PHP_ADD_LIBRARY(uuid, , PDO_CASSANDRA_SHARED_LIBADD)
-  ],[
-    AC_MSG_ERROR([wrong uuid lib version or lib not found])
-  ])
-  dnl PHP_ADD_LIBRARY(stdc++, , PDO_CASSANDRA_SHARED_LIBADD)
+  if test "$PHP_UUID" = "no"; then
+    AC_MSG_ERROR([uuid enable needed!])
+  else
+    found_uuid=no
+    if test "$PHP_UUID" = "yes" && test -x "$PKG_CONFIG" && $PKG_CONFIG --exists uuid; then
+      found_uuid=yes
+      UUID_LIBS=`$PKG_CONFIG --libs uuid`
+      UUID_INCS=`$PKG_CONFIG --cflags-only-I uuid`
+    fi
+
+    if test "$found_uuid" = "no"; then
+      SEARCH_PATH="/usr/local/include /usr/include"
+      SEARCH_FOR="uuid/uuid.h"
+      if test -r $PHP_UUID/$SEARCH_FOR; then # path given as parameter
+        AC_MSG_CHECKING([for uuid files in $PHP_UUID])
+        AC_MSG_RESULT(yes)
+        UUID_INCS="-I$PHP_UUID"
+      else
+        AC_MSG_CHECKING([for uuid files in default path])
+        for i in $SEARCH_PATH ; do
+          if test -r $i/$SEARCH_FOR; then
+            UUID_INCS="-I$i"
+            AC_MSG_RESULT(found in $i)
+          fi
+        done
+      fi
+
+      AC_MSG_CHECKING([for uuid library location])
+      for i in $PHP_UUID $PHP_UUID/$PHP_LIBDIR /usr/local/$PHP_LIBDIR /usr/$PHP_LIBDIR; do
+        if test -f $i/libuuid.a || test -f $i/libuuid.$SHLIB_SUFFIX_NAME; then
+          AC_MSG_RESULT(found in $i)
+          UUID_LIBS="-L$i -luuid"
+        fi
+      done
+    fi
+
+    SAVED_CPPFLAGS=$CPPFLAGS
+    CPPFLAGS="$CPPFLAGS $UUID_INCS $UUID_LIBS"
+    PHP_CHECK_LIBRARY(uuid, uuid_unparse, [
+      PHP_EVAL_LIBLINE($UUID_LIBS, PDO_CASSANDRA_SHARED_LIBADD)
+      PHP_EVAL_INCLINE($UUID_INCS)
+    ], [
+      AC_MSG_ERROR([wrong uuid lib version or lib not found])
+    ])
+    CPPFLAGS=$SAVED_CPPFLAGS
+  fi
+
   AC_DEFINE(HAVE_PDO_CASSANDRALIB,1,[ ])
   PHP_SUBST(PDO_CASSANDRA_SHARED_LIBADD)
 
