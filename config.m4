@@ -11,6 +11,9 @@ PHP_ARG_WITH(thrift, for thrift support,
 PHP_ARG_WITH(uuid, for uuid support,
 [  --with-uuid             Include uuid support], yes, no)
 
+PHP_ARG_WITH(boost, for boost support,
+[  --with-boost            Include boost support], yes, no)
+
 if test "$PHP_PDO_CASSANDRA" != "no"; then
   PHP_REQUIRE_CXX()
 
@@ -221,6 +224,34 @@ if test "$PHP_PDO_CASSANDRA" != "no"; then
     ])
     CPPFLAGS=$SAVED_CPPFLAGS
   fi
+
+  if test "$PHP_BOOST" = "no"; then
+    AC_MSG_ERROR([require boost])
+  else
+    SEARCH_PATH="/usr/local/include /usr/include"
+    SEARCH_FOR="boost/shared_ptr.hpp"
+    AC_MSG_RESULT($PHP_BOOST/$SEARCH_FOR)
+    if test -r $PHP_BOOST/$SEARCH_FOR; then # path given as parameter
+      AC_MSG_CHECKING([for boost files in $PHP_BOOST])
+      AC_MSG_RESULT(yes)
+      BOOST_INCS="-I$PHP_BOOST"
+    else
+      AC_MSG_CHECKING([for boost files in default path])
+      for i in $SEARCH_PATH ; do
+        if test -r $i/$SEARCH_FOR; then
+          BOOST_INCS="-I$i"
+          AC_MSG_RESULT(found in $i)
+        fi
+      done
+    fi
+
+    if test -z "$BOOST_INCS"; then
+      AC_MSG_ERROR([Could not find boost/shared_ptr.h in $SEARCH_PATH])
+    fi
+
+    PHP_EVAL_INCLINE($BOOST_INCS)
+  fi
+
 
   AC_DEFINE(HAVE_PDO_CASSANDRALIB,1,[ ])
   PHP_SUBST(PDO_CASSANDRA_SHARED_LIBADD)
