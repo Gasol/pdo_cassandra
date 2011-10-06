@@ -45,6 +45,15 @@ char *tokendup(char *str)
 	}
 }
 
+char *scan_keyspace(char *cql)
+{
+    char *q;
+/*!re2c
+	[ ]*'use'[ ]+        {return tokendup(YYCURSOR);}
+	[^]				{return (char*) 0;}
+ */
+}
+
 char *scan_columnfamily(char *cql)
 {
 	char *q;

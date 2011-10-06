@@ -57,6 +57,7 @@ extern struct pdo_stmt_methods cassandra_stmt_methods;
 
 BEGIN_EXTERN_C()
 char* scan_columnfamily(char *cql);
+char* scan_keyspace(char *cql);
 char* ltoa(long N, char *str, int base);
 END_EXTERN_C()
 int64_t deserializeLong(string &str);
