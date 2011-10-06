@@ -1,8 +1,8 @@
 #!/bin/sh
 
-PHP_TEST_EXECUTABLE="/usr/bin/php"
-PHPCONFIG="/usr/bin/php-config"
-PHP="/usr/bin/php"
+PHP=$(which php)
+PHP_TEST_EXECUTABLE=$PHP
+PHPCONFIG=$(which php-config)
 MODULE_DIR="./modules/"
 EXTENSION_DIR="`$PHPCONFIG --extension-dir`"
 
