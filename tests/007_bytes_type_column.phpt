@@ -26,12 +26,16 @@ function strToHex($str) {
     return $hex;
 }
 
-$db->exec("CREATE KEYSPACE $keyspace WITH strategy_class = 'org.apache.cassandra.locator.SimpleStrategy' AND strategy_options:replication_factor = 1") . PHP_EOL;
-$db->exec("USE $keyspace") . PHP_EOL;
-$db->exec("CREATE COLUMNFAMILY $columnFamily (KEY text PRIMARY KEY) WITH comparator = bytea");
+$db->exec("CREATE KEYSPACE $keyspace WITH " .
+    "strategy_class = 'org.apache.cassandra.locator.SimpleStrategy' AND " .
+    "strategy_options:replication_factor = 1");
+$db->exec("USE $keyspace");
+$db->exec("CREATE COLUMNFAMILY $columnFamily (KEY text PRIMARY KEY) " .
+    "WITH comparator = bytea");
 
 $chinese = strToHex('中文測試');
-$db->exec("INSERT INTO $columnFamily (KEY, '30', '61', '41', '$chinese') VALUES ('row_a', '', '', '', '')");
+$db->exec("INSERT INTO $columnFamily (KEY, '30', '61', '41', '$chinese') " .
+    "VALUES ('row_a', '', '', '', '')");
 $stmt = $db->query("SELECT * FROM $columnFamily");
 var_dump($stmt->fetchAll());
 echo 'columnCount: ' . $stmt->columnCount() . PHP_EOL;

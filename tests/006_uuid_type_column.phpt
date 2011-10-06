@@ -18,8 +18,10 @@ try {
     // ignore
 }
 
-$db->exec("CREATE KEYSPACE $keyspace WITH strategy_class = 'org.apache.cassandra.locator.SimpleStrategy' AND strategy_options:replication_factor = 1") . PHP_EOL;
-$db->exec("USE $keyspace") . PHP_EOL;
+$db->exec("CREATE KEYSPACE $keyspace WITH " .
+    "strategy_class = 'org.apache.cassandra.locator.SimpleStrategy' AND " .
+    "strategy_options:replication_factor = 1");
+$db->exec("USE $keyspace");
 $db->exec("CREATE COLUMNFAMILY $columnFamily (KEY text PRIMARY KEY) WITH comparator = uuid");
 
 $columns = array();
@@ -28,7 +30,9 @@ for ($i = 0; $i < 20; $i++) {
     $columns[] = "'column$i'";
     $values[] = "'value$i'";
 }
-$db->exec("INSERT INTO $columnFamily (KEY, '3abdd164-5f35-4324-9f89-d6afa1e5fe24', '217aae67-8dbf-4a3c-b261-604f19abd996', '776272a4-9dab-432f-bc4e-12a425e5d3af') VALUES ('row_a', '', '', '')");
+$db->exec("INSERT INTO $columnFamily (KEY, '3abdd164-5f35-4324-9f89-d6afa1e5fe24', " .
+    "'217aae67-8dbf-4a3c-b261-604f19abd996', '776272a4-9dab-432f-bc4e-12a425e5d3af') " .
+    "VALUES ('row_a', '', '', '')");
 $stmt = $db->query("SELECT * FROM $columnFamily");
 var_dump($stmt->fetchAll());
 echo 'columnCount: ' . $stmt->columnCount() . PHP_EOL;

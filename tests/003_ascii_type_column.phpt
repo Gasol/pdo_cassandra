@@ -18,7 +18,9 @@ try {
     // ignore
 }
 
-$db->exec("CREATE KEYSPACE $keyspace WITH strategy_class = 'org.apache.cassandra.locator.SimpleStrategy' AND strategy_options:replication_factor = 1") . PHP_EOL;
+$db->exec("CREATE KEYSPACE $keyspace WITH " .
+    "strategy_class = 'org.apache.cassandra.locator.SimpleStrategy' " .
+    "AND strategy_options:replication_factor = 1") . PHP_EOL;
 $db->exec("USE $keyspace") . PHP_EOL;
 $db->exec("CREATE COLUMNFAMILY $columnFamily (KEY text PRIMARY KEY) WITH comparator = ascii");
 
@@ -28,14 +30,16 @@ for ($i = 0; $i < 20; $i++) {
     $columns[] = "'column$i'";
     $values[] = "'value$i'";
 }
-$db->exec("INSERT INTO $columnFamily (KEY, " . implode(', ', $columns) . ") VALUES ('row_a', " . implode(', ', $values) . ")");
+$db->exec("INSERT INTO $columnFamily (KEY, " . implode(', ', $columns) . ") " .
+    "VALUES ('row_a', " . implode(', ', $values) . ")");
 $columns = array();
 $values = array();
 for ($i = 30; $i < 40; $i++) {
     $columns[] = "'column$i'";
     $values[] = "'value$i'";
 }
-$db->exec("INSERT INTO $columnFamily (KEY, " . implode(', ', $columns) . ") VALUES ('row_b', " . implode(', ', $values) . ")");
+$db->exec("INSERT INTO $columnFamily (KEY, " . implode(', ', $columns) . ") " .
+    "VALUES ('row_b', " . implode(', ', $values) . ")");
 $stmt = $db->query("SELECT * FROM $columnFamily");
 var_dump($stmt->fetchAll());
 echo 'columnCount: ' . $stmt->columnCount() . PHP_EOL;
