@@ -51,9 +51,6 @@ class CassandraPDOTest
         if ($port) {
             $dsn .= sprintf(';port=%s', $port);
         }
-        if ($keyspace) {
-            $dsn .= sprintf(';keyspace=%s', $keyspace);
-        }
         return $dsn;
     }
 }
