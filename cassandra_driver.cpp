@@ -75,6 +75,13 @@ static long cassandra_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len 
 
 	CqlResult result;
 	try {
+		char *cql = estrdup(sql);
+		char *keyspace = scan_keyspace(cql);
+		efree(cql);
+		if (keyspace) {
+			H->keyspace->assign(keyspace);
+			efree(keyspace);
+		}
 		H->client.execute_cql_query(result, sql, Compression::NONE);
 	} catch(InvalidRequestException &e) {
 		char *message = estrdup(e.why.c_str());
@@ -207,12 +214,10 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 		}
 
 		if (keyspace) {
-			CqlResult result;
-			char *cql = new char[strlen(keyspace)+5];
-			sprintf(cql, "USE %s\0", keyspace);
-			H->client.execute_cql_query(result, cql, Compression::NONE);
-            *H->keyspace = keyspace;
-			delete [] cql;
+			*H->keyspace = keyspace;
+			string cql("USE ");
+			cql.append(keyspace);
+			cassandra_handle_doer(dbh, cql.c_str(), strlen(cql.c_str()) TSRMLS_CC);
 		}
 	} catch (InvalidRequestException &e) {
 		char *message = estrdup(e.why.c_str());
