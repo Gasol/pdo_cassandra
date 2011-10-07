@@ -254,7 +254,6 @@ static int pdo_cassandra_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, u
 	}
 
 	Column col = row.columns[colno];
-	size_t ptr_len = 0;
 
     map<string, KsDef>::iterator ks_it = H->ks_defs->find(*H->keyspace);
     if (ks_it != H->ks_defs->end()) {
@@ -270,8 +269,6 @@ static int pdo_cassandra_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, u
 						int64_t long_value = deserializeLong(col.value);
 						char value[sizeof(int64_t) * 8 + 1];
 						*ptr = ltoa(long_value, value, 10);
-                    } else {
-                        *ptr = estrdup(col.value.c_str());
                     }
 					break;
                 } else {
@@ -309,10 +306,11 @@ static int pdo_cassandra_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, u
         }
     }
 
-	if (ptr_len == 0) {
+	if (*ptr == NULL) {
+		*ptr = estrdup(col.value.c_str());
+	}
+	if (*ptr != NULL) {
 		*len = strlen(*ptr);
-	} else {
-		*len = ptr_len;
 	}
 
 	return 1;
