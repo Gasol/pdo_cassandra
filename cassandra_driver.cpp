@@ -70,7 +70,7 @@ static int cassandra_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_l
 
 static long cassandra_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC)
 {
-    DEBUG_OUTPUT("doser");
+    DEBUG_OUTPUT("doer");
 	pdo_cassandra_db_handle *H = (pdo_cassandra_db_handle *)dbh->driver_data;
 
 	CqlResult result;
