@@ -79,8 +79,10 @@ static long cassandra_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len 
 		char *keyspace = scan_keyspace(cql);
 		efree(cql);
 		if (keyspace) {
+			H->client.set_keyspace(keyspace);
 			H->keyspace->assign(keyspace);
 			efree(keyspace);
+			return 0;
 		}
 		H->client.execute_cql_query(result, sql, Compression::NONE);
 	} catch(InvalidRequestException &e) {
@@ -171,8 +173,8 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 
 	struct pdo_data_src_parser vars[] = {
 		{"host", NULL, 0},
-		{"keyspace", NULL, 0},
 		{"port", "9160", 0},
+		{"keyspace", NULL, 0},
 	};
 
 	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars,
@@ -185,10 +187,10 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 	dbh->driver_data = H;
 
 	host = vars[0].optval;
-	keyspace = vars[1].optval;
-	if (vars[2].optval) {
-		port = atoi(vars[2].optval);
+	if (vars[1].optval) {
+		port = atoi(vars[1].optval);
 	}
+	keyspace = vars[2].optval;
 
     if (host == NULL) {
         char *message = const_cast<char *>("invalid data source name");
@@ -214,10 +216,8 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 		}
 
 		if (keyspace) {
-			*H->keyspace = keyspace;
-			string cql("USE ");
-			cql.append(keyspace);
-			cassandra_handle_doer(dbh, cql.c_str(), strlen(cql.c_str()) TSRMLS_CC);
+            *H->keyspace = keyspace;
+            H->client.set_keyspace(*H->keyspace);
 		}
 	} catch (InvalidRequestException &e) {
 		char *message = estrdup(e.why.c_str());

@@ -62,8 +62,10 @@ static int pdo_cassandra_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
         }
         char *keyspace = scan_keyspace(stmt->active_query_string);
         if (keyspace) {
+			H->client.set_keyspace(keyspace);
             *H->keyspace = keyspace;
             efree(keyspace);
+			return 0;
         }
 		H->client.execute_cql_query(*result, stmt->active_query_string, Compression::NONE);
 	} catch(InvalidRequestException &e) {
