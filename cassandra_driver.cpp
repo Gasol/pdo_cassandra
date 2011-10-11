@@ -37,15 +37,20 @@ static int cassandra_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 	pdo_cassandra_db_handle *H = (pdo_cassandra_db_handle *)dbh->driver_data;
 
 	if (H) {
-		if (H->transport != NULL && H->transport->isOpen()) {
-			H->transport->close();
-		}
         if (H->keyspace) {
             delete H->keyspace;
         }
         if (H->ks_defs) {
             delete H->ks_defs;
         }
+		if (H->client) {
+			boost::shared_ptr<TProtocol> protocol = H->client->getInputProtocol();
+			boost::shared_ptr<TTransport> transport = protocol->getTransport();
+			if (transport->isOpen()) {
+				transport->close();
+			}
+			delete H->client;
+		}
 		pefree(H, dbh->is_persistent);
 		dbh->driver_data = NULL;
 	}
@@ -79,12 +84,12 @@ static long cassandra_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len 
 		char *keyspace = scan_keyspace(cql);
 		efree(cql);
 		if (keyspace) {
-			H->client.set_keyspace(keyspace);
+			H->client->set_keyspace(keyspace);
 			H->keyspace->assign(keyspace);
 			efree(keyspace);
 			return 0;
 		}
-		H->client.execute_cql_query(result, sql, Compression::NONE);
+		H->client->execute_cql_query(result, sql, Compression::NONE);
 	} catch(InvalidRequestException &e) {
 		char *message = estrdup(e.why.c_str());
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, message);
@@ -122,7 +127,7 @@ static int pdo_cassandra_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_v
     switch (attr) {
         case PDO_ATTR_SERVER_VERSION:
             string ver;
-            H->client.describe_version(ver);
+            H->client->describe_version(ver);
             RETVAL_STRING(ver.c_str(), 1);
     }
 	return 1;
@@ -202,22 +207,21 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
         boost::shared_ptr<TSocket> socket(new TSocket(host, port));
         boost::shared_ptr<TTransport> transport(new TFramedTransport(socket));
         boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
-        CassandraClient client(protocol);
+        CassandraClient *client = new CassandraClient(protocol);
 
 		H->client = client;
-		H->transport = transport;
 		transport->open();
 
 		if (dbh->username && dbh->password) {
 			AuthenticationRequest auth_request;
 			auth_request.credentials.insert(pair<string, string>("username", dbh->username));
 			auth_request.credentials.insert(pair<string, string>("password", dbh->password));
-			client.login(auth_request);
+			client->login(auth_request);
 		}
 
 		if (keyspace) {
             *H->keyspace = keyspace;
-            H->client.set_keyspace(*H->keyspace);
+            H->client->set_keyspace(*H->keyspace);
 		}
 	} catch (InvalidRequestException &e) {
 		char *message = estrdup(e.why.c_str());

@@ -38,8 +38,7 @@ using namespace org::apache::cassandra;
 using namespace std;
 
 typedef struct {
-	CassandraClient client;
-	boost::shared_ptr<TTransport> transport;
+	CassandraClient *client;
     string *keyspace;
     map<string, KsDef> *ks_defs;
 } pdo_cassandra_db_handle;
