@@ -207,16 +207,15 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
         boost::shared_ptr<TSocket> socket(new TSocket(host, port));
         boost::shared_ptr<TTransport> transport(new TFramedTransport(socket));
         boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
-        CassandraClient *client = new CassandraClient(protocol);
-
-		H->client = client;
 		transport->open();
+
+		H->client = new CassandraClient(protocol);
 
 		if (dbh->username && dbh->password) {
 			AuthenticationRequest auth_request;
-			auth_request.credentials.insert(pair<string, string>("username", dbh->username));
-			auth_request.credentials.insert(pair<string, string>("password", dbh->password));
-			client->login(auth_request);
+			auth_request.credentials["username"] = dbh->username;
+			auth_request.credentials["password"] = dbh->password;
+			H->client->login(auth_request);
 		}
 
 		if (keyspace) {
