@@ -177,9 +177,9 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 	long timeout = 60;
 
 	struct pdo_data_src_parser vars[] = {
-		{"host", NULL, 0},
-		{"port", "9160", 0},
-		{"keyspace", NULL, 0},
+		{"host", host, 0},
+		{"port", NULL, 0},
+		{"keyspace", keyspace, 0},
 	};
 
 	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars,
