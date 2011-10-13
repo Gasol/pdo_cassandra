@@ -197,7 +197,7 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 	}
 	keyspace = vars[2].optval;
 
-    if (host == NULL) {
+    if (!host) {
         char *message = const_cast<char *>("invalid data source name");
         zend_throw_exception(php_pdo_get_exception(), message, 0 TSRMLS_CC);
         goto cleanup;
