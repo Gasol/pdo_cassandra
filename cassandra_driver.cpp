@@ -219,8 +219,8 @@ static int pdo_cassandra_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSR
 		}
 
 		if (keyspace) {
-            *H->keyspace = keyspace;
             H->client->set_keyspace(*H->keyspace);
+            *H->keyspace = keyspace;
 		}
 	} catch (InvalidRequestException &e) {
 		char *message = estrdup(e.why.c_str());
